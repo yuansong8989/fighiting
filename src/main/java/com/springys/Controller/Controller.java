@@ -470,4 +470,9 @@ public class Controller {
         return ResultMain.success1("替换成功");
     }
     //运行脚本文件
+    @RequestMapping("HelloGit")
+    @ResponseBody
+    public String HelloGit(){
+        return "HelloGit";
+    }
 }
