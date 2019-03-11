@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.springys.Dao.MainDao">
+    <resultMap id="mmm" type="com.springys.entity.Aj">
+        <result property="dbserver_config_id" column="dbserver_config_id"/>
+        <result property="id" column="id"/>
+        <result property="alias" column="alias"/>
+        <result property="config" column="config"/>
+        <result property="db_name" column="db_name"/>
+        <result property="db_type_id" column="db_type_id"/>
+        <result property="repository_id" column="repository_id"/>
+    </resultMap>
+    <select id="getDataBaseList" resultMap="mmm">
+    SELECT
+    dbserver_config_id,
+    id,
+    alias,
+    config,
+    db_name,
+    db_type_id,
+    repository_id
+    FROM db
+</select>
+    <insert id="exitDatabase">
+    INSERT INTO db (config,db_name,repository_id,dbserver_config_id,db_type_id,alias,create_time)
+    VALUES (#{config},#{db_name},#{repository_id},#{dbserver_config_id},#{db_type_id},#{alias},#{create_time})
+</insert>
+    <delete id="deleteDatabase">
+DELETE FROM db WHERE id=#{id}
+</delete>
+    <resultMap id="nnn" type="com.springys.entity.SelectPassword">
+        <result property="create_time" column="create_time"/>
+        <result property="id" column="id"/>
+        <result property="password" column="password"/>
+        <result property="update_time" column="update_time"/>
+    </resultMap>
+    <select id="login" resultMap="nnn">
+        SELECT * FROM password AS a WHERE a.password=#{password}
+    </select>
+    <resultMap id="user1" type="com.springys.entity.BigData">
+        <result property="plantform_val" column="plantform_val"/>
+        <result property="platform_id" column="platform_id"/>
+        <result property="platform_name" column="platform_name"/>
+    </resultMap>
+    <select id="Sinformation" resultMap="user1">
+SELECT * FROM plantform_config WHERE platform_name=#{user}
+    </select>
+    <resultMap id="page" type="com.springys.entity.Students">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="password" property="password"/>
+        <result column="uid" property="uid"/>
+    </resultMap>
+    <select id="pageSelect" resultMap="page">
+     SELECT * FROM student WHERE uid=#{id}
+    </select>
+    <resultMap id="file" type="com.springys.entity.Students">
+        <!--<id column="id" property="id"/>-->
+        <result property="file_url" column="file_url"/>
+    </resultMap>
+    <select id="selectUrl" resultMap="file">
+        SELECT * FROM student WHERE id=#{number}
+    </select>
+    <delete id="delete">
+        DELETE FROM student WHERE id=#{id}
+    </delete>
+    <resultMap id="lyb" type="com.springys.entity.Students">
+        <result property="file_url" column="file_url"/>
+    </resultMap>
+    <select id="ClearSelect" resultMap="lyb">
+        SELECT * FROM student WHERE  student.file_url LIKE concat('%',#{filename},'%')
+    </select>
+    <insert id="InsertFileName">
+        INSERT INTO student (file_url) VALUES (#{filename})
+    </insert>
+    <resultMap id="classify" type="com.springys.entity.Students">
+        <result property="file_url" column="file_url"/>
+    </resultMap>
+    <select id="classifySelect" resultMap="classify">
+        SELECT *  FROM student,classify WHERE classify.classifyid=student.uid AND classify.classifyid=#{classify}
+    </select>
+    <insert id="addClassify">
+INSERT  into classify (classify.classifyname) VALUES
+<foreach collection="classList" item="classify" separator=",">
+    (
+    #{classify.classifyname}
+    )
+</foreach>
+    </insert>
+    <update id="fileClassify">
+        UPDATE student SET uid=#{fileuid} where id=#{fileid1}
+    </update>
+    <select id="selectCount" resultType="int">
+        SELECT count(file_url) FROM student WHERE student.file_url is NOT NULL AND uid=#{id}
+</select>
+    <update id="updatetime">
+        UPDATE student SET file_url=#{name} WHERE id=#{id}
+    </update>
+    <update id="updatetime1"  >
+        UPDATE student SET update_time=#{date} WHERE id=#{id}
+</update>
+    <sql id="Assist">
+        <where>
+            <foreach collection="require" item="req" separator=" ">
+                ${req.require}
+                <if test="req.value != null"> #{req.value}</if>
+                <if test="req.values != null">
+                    <foreach collection="req.values" item="val" separator=",">
+                        #{val}
+                    </foreach>
+                </if>
+                <if test="req.suffix != null"> ${req.suffix}</if>
+            </foreach>
+        </where>
+    </sql>
+<sql id="selectStudents">
+student.id as id,
+student.file_url as file_url,
+student.uid as uid,
+student.password as password,
+student.name as name
+</sql>
+    <resultMap id="selectStudents" type="com.springys.entity.Students">
+        <result property="id" column="id"/>
+        <result property="file_url" column="file_url"/>
+        <result property="uid" column="uid"/>
+        <result property="password" column="password"/>
+        <result property="name" column="name"/>
+    </resultMap>
+    <select id="selectStudents" parameterType="com.springys.Common.Assist" resultMap="selectStudents">
+        SELECT <if test="distinct !=null">#{distinct}</if>
+        <choose>
+            <when test="resultColumn !=null">#{resultColumn}</when>
+            <otherwise>
+                <include refid="selectStudents"/>
+            </otherwise>
+        </choose>
+        from student
+        <choose>
+            <when test="rowSize ==null">
+                <if test="require!=null">
+                    <include refid="Assist" />
+                </if>
+                <if test="order !=null">${order}</if>
+            </when>
+            <otherwise>
+                inner join
+                (
+                SELECT id as primary_key FROM student
+                <if test="require!=null">
+                    <include refid="Assist" />
+                </if>
+                <if test="order !=null">${order}</if>
+                <choose>
+                    <when test="startRow !=null and rowSize !=null">LIMIT #{startRow},#{rowSize} </when>
+                    <when test="rowSize !=null">LIMIT #{rowSize}</when>
+                </choose>
+                ) as tmp
+                on tmp.primary_key=student.id
+            </otherwise>
+        </choose>
+    </select>
+</mapper>
