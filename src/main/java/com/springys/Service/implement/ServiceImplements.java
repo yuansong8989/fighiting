@@ -2,6 +2,7 @@ package com.springys.Service.implement;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.springys.Common.Assist;
 import com.springys.Common.QuartzManager;
 import com.springys.Dao.MainDao;
 import com.springys.Service.Servicemain;
@@ -123,26 +124,6 @@ public class ServiceImplements implements Servicemain {
         return pageInfo;
     }
 
-    @Override
-    public FilePage pageFIle(int pageNum, int pageSize,int id) {
-        PageHelper.startPage(pageNum, pageSize);
-        List<Students> list = mainDao.pageSelect(id);
-//        for(Students students1 : list){
-//            log.info("名称为:"+students1.getFile_url());
-//        }
-//        List<Students> list2 =list.stream().filter(t -> t.getUid()==id).collect(Collectors.toList());//查出所有uid=id的学生
-        List<String> list1 = new ArrayList<>();
-        FilePage filePage = new FilePage();
-        for (Students students : list) {
-            list1.add(students.getFile_url());
-//          students.getFile_url()
-        }
-
-        int count = mainDao.selectCount(id);
-        filePage.setTotal(count);
-        filePage.setList(list1);
-        return filePage;
-    }
 
     @Override
     @Transactional
@@ -212,4 +193,121 @@ public class ServiceImplements implements Servicemain {
 e.printStackTrace();
         }
     }
+    //    校园后台管理系统登陆
+    @Override
+    public boolean selectUser(User user) {
+
+            Assist assist=new Assist();
+            assist.andEq("username",user.getUsername());
+            assist.andEq("password",user.getPassword());
+            User user1 =mainDao.selectUser(assist).get(0);
+            if(user1==null){
+                return false;
+            }
+            if(user1.getUsername().equals(user.getUsername())&&user1.getPassword().equals(user.getPassword())){
+                return true;
+            }
+        return false;
+        }
+    @Override
+    public FilePage pageFIle(int pageNum, int pageSize,int id) {
+        PageHelper.startPage(pageNum, pageSize);
+        List<Students> list = mainDao.pageSelect(id);
+//        for(Students students1 : list){
+//            log.info("名称为:"+students1.getFile_url());
+//        }
+//        List<Students> list2 =list.stream().filter(t -> t.getUid()==id).collect(Collectors.toList());//查出所有uid=id的学生
+        List<String> list1 = new ArrayList<>();
+        FilePage filePage = new FilePage();
+        for (Students students : list) {
+            list1.add(students.getFile_url());
+//          students.getFile_url()
+        }
+
+        int count = mainDao.selectCount(id);
+        filePage.setTotal(count);
+        filePage.setList(list1);
+        return filePage;
+    }
+
+    @Override
+    public FilePage pageUser(int pageNum, int pageSize) {
+        Assist assist=new Assist();
+        PageHelper.startPage(pageNum, pageSize);
+       List<User> users= mainDao.selectUser(assist);
+       int count=mainDao.userCount();//总数
+        FilePage filePage=new FilePage();
+        filePage.setTotal(count);
+        filePage.setList1(users);
+        return filePage;
+    }
+    //邮箱格式检验
+    public boolean emailCheck(String email){
+        if(email==null){
+            return false;
+        }
+        if(email.endsWith(".com")){
+            return true;
+        }
+        return false;
+    }
+        //用户学号 只允许 201510414424 12位数字
+    public boolean studentIdCheck(String studentId){
+        if(studentId==null){
+            return false;
+        }
+        if(studentId.length()!=12){
+            return false;
+        }
+        for (int i = 0; i < studentId.length(); i++){
+            if(!Character.isDigit(studentId.charAt(i))){//如果某个不为数字 则报错
+                return false;
+            }
+        }
+        return true;
+    }
+    //按照邮箱筛选 查询
+    public User emailSearch(String a){
+        Assist assist=new Assist();
+        assist.andEq("email",a);
+        if(mainDao.selectUser(assist).get(0)!=null){
+            return mainDao.selectUser(assist).get(0);
+        }
+return null;
+    }
+    //按照学号搜索筛选
+    public User studentIdSearch(String a){
+        Assist assist=new Assist();
+        assist.andEq("username",a);
+        if(mainDao.selectUser(assist).get(0)!=null){
+            return mainDao.selectUser(assist).get(0);
+        }
+        return null;
+    }
+    //批量删除用户
+    public boolean deleteUser(FilePage filePage){
+        if(filePage!=null){
+            List<User> list=filePage.getList1();
+            List<Integer > list1=new ArrayList<>();
+            for(User user : list){
+                list1.add(user.getId());
+            }
+            mainDao.deleteUser(list1);
+            return true;
+        }
+        return false;
+    }
+//等级升降筛选
+    public List<User> sortgrade(SearchUser searchUser){
+        Assist assist=new Assist();
+        if(searchUser.getAsc()==1){
+
+            //返回升序数据
+        }
+        if(searchUser.getDesc()==1){
+            //返回降序数据
+
+        }
+    }
 }
+

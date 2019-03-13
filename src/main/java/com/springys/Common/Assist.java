@@ -138,7 +138,7 @@ public class Assist {
 		@Override
 		public String toString() {
 			return "WhereOrder [column=" + column + ", mode=" + mode + "]";
-		}
+	}
 
 	}
 

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.springys.Common.*;
 import com.springys.Dao.JpaRepository;
-import com.springys.Service.Servicemain;
+import com.springys.Service.implement.ServiceImplements;
 import com.springys.entity.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class Controller {
     String a;
     @Resource
-    private Servicemain servicemain;
+    private ServiceImplements servicemain;
     @Resource
     private RuseltData ruseltData;
     static List<String> b = new ArrayList<>();
@@ -293,7 +293,7 @@ public class Controller {
     @RequestMapping("/testHttpMessageDown")
     @ResponseBody
     public String download(HttpServletResponse response) throws IOException {
-        File file = new File("g:/upload/zc.txt" );
+        File file = new File("g:/upload/zc.txt");
         String filename = "我唉你.txt";
         InputStream is = new FileInputStream(file);//抽象类必须依靠子类fILE***实现 输入流
         // 要一次读取多个字节时，经常用到InputStream.available()方法，这个方法可以在读写操作前先得知数据流里有多少个字节可以读取。
@@ -455,24 +455,99 @@ public class Controller {
     public Uniti replaceFile(@RequestParam("id") int id, @RequestParam("file") MultipartFile file) throws Exception {
         FileUtils.writeByteArrayToFile(new File("g:/upload/" + file.getOriginalFilename()), file.getBytes());
 //   servicemain.updatetime(file.getOriginalFilename(), id);
-        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        String a=simpleDateFormat.format(new Date());
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String a = simpleDateFormat.format(new Date());
 //         Date date1=  simpleDateFormat.parse(a);
 //        log.info("日期格式1"+date1);
-        Timestamp timestamp=Timestamp.valueOf(a);
-        log.info("日期"+timestamp);
+        Timestamp timestamp = Timestamp.valueOf(a);
+        log.info("日期" + timestamp);
 //        Timestamp d = new Timestamp(System.currentTimeMillis());
 //        log.info("日期格式2"+d);
 //        Calendar calendar=Calendar.getInstance();
 //        String nb=simpleDateFormat.format(calendar.getTime());
 //        log.info(nb);
-        servicemain.updatetime1(id,timestamp);
+        servicemain.updatetime1(id, timestamp);
         return ResultMain.success1("替换成功");
     }
+
     //运行脚本文件
-    @RequestMapping("HelloGit")
+//    校园后台管理系统登陆
+    @RequestMapping("loginmanger")
     @ResponseBody
-    public String HelloGit(){
-        return "HelloGit";
+    public ResultModel loginManager(@RequestBody User user) {
+        if (user.getUsername() == null || user.getPassword() == null) {
+            return ResultUtil.error();
+        }
+        if (servicemain.selectUser(user)) {
+            return ResultUtil.success();
+        } else return ResultUtil.error(RequestResultEnum.login_auth_error);
     }
+
+    //校园新闻后台管理系统-用户管理模块
+    //分页查询
+    @RequestMapping("pageuser")
+    @ResponseBody
+    public ResultModel pageUser(@RequestBody PageParameter pageParameter) {
+        if (pageParameter.getPageNum() == 0 || pageParameter.getPagesize() == 0) {
+            ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
+        } else {
+            FilePage filePage = servicemain.pageUser(pageParameter.getPageNum(), pageParameter.getPagesize());
+            return ResultUtil.success(filePage);
+        }
+        return ResultUtil.error(RequestResultEnum.EDIT_FAIL);
+    }
+
+    //用户搜索 按照姓名 或者 邮箱来搜索 设定用户名 以及邮箱不能一致
+    @RequestMapping("usersearch")
+    @ResponseBody
+    public ResultModel userSearch(@RequestBody SearchUser searchUser) {
+        if (searchUser.getTerm() == null) {
+            return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
+        }
+        if (searchUser.getTerm() != null) {
+            if (searchUser.getTerm().length() == 12) {
+                //学号搜索
+                if (servicemain.studentIdSearch(searchUser.getTerm()) != null) {
+                    return ResultUtil.success(servicemain.studentIdSearch(searchUser.getTerm()));
+                }
+            }
+            if (searchUser.getTerm().length() > 12) {
+                //邮箱搜索
+                if (servicemain.emailSearch(searchUser.getTerm()) != null) {
+                    return ResultUtil.success(servicemain.emailSearch(searchUser.getTerm()));
+                }
+            }
+            return ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
+        }
+        return ResultUtil.error();
+    }
+
+    //校园后台批量删除用户
+    @RequestMapping("deleteuser")
+    @ResponseBody
+    public ResultModel deleteUser(@RequestBody FilePage filePage) {
+        if (filePage == null) {
+            return ResultUtil.error(RequestResultEnum.DELETE_FAIL);
+        }
+        if (servicemain.deleteUser(filePage)) {
+            return ResultUtil.success();
+        }
+        return ResultUtil.error();
+    }
+
+    //用户等级排序
+    @RequestMapping("gradeselect")
+    @ResponseBody
+    public ResultModel gradeSelect(@RequestBody SearchUser searchUser) {
+        if (searchUser == null) {
+            return ResultUtil.error();
+        }
+        if (searchUser != null) {
+            if (servicemain.sortgrade(searchUser) != null) {
+                return ResultUtil.success(servicemain.sortgrade(searchUser));
+            }
+        }
+        return ResultUtil.error();
+    }
+
 }

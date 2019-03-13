@@ -127,15 +127,32 @@ student.name as name
         <result property="password" column="password"/>
         <result property="name" column="name"/>
     </resultMap>
-    <select id="selectStudents" parameterType="com.springys.Common.Assist" resultMap="selectStudents">
-        SELECT <if test="distinct !=null">#{distinct}</if>
+    <sql id="User">
+        user.id as id,
+        user.username as username,
+        user.password as password,
+        user.email as email,
+        user.grade as grade,
+        user.safeindex as safeindex
+    </sql>
+    <resultMap id="result_user" type="com.springys.entity.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="email" property="email"/>
+        <result property="grade" column="grade"/>
+        <result property="safeindex" column="safeindex"/>
+
+    </resultMap>
+    <select id="selectUser" parameterType="com.springys.Common.Assist"  resultMap="result_user">
+        select  <if test="distinct !=null">${distinct}</if>
         <choose>
-            <when test="resultColumn !=null">#{resultColumn}</when>
+            <when test="resultColumn!=null">${resultColumn}</when>
             <otherwise>
-                <include refid="selectStudents"/>
+                <include refid="User" />
             </otherwise>
         </choose>
-        from student
+        from user
         <choose>
             <when test="rowSize ==null">
                 <if test="require!=null">
@@ -146,7 +163,7 @@ student.name as name
             <otherwise>
                 inner join
                 (
-                SELECT id as primary_key FROM student
+                SELECT id as primary_key FROM user
                 <if test="require!=null">
                     <include refid="Assist" />
                 </if>
@@ -156,8 +173,19 @@ student.name as name
                     <when test="rowSize !=null">LIMIT #{rowSize}</when>
                 </choose>
                 ) as tmp
-                on tmp.primary_key=student.id
+                on tmp.primary_key=script.id
             </otherwise>
         </choose>
     </select>
+    <!--返回用户条数-->
+    <select id="userCount" resultType="int">
+        SELECT count(username) FROM user WHERE user.username is NOT NULL
+    </select>
+    <!--批量删除用户-->
+    <delete id="deleteUser" parameterType="arraylist">
+        DELETE FROM user WHERE id in
+        <foreach collection="list" open="(" close=")" separator="," item="id" >
+            #{id}
+        </foreach>
+    </delete>
 </mapper>

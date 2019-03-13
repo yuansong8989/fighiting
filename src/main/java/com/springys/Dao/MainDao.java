@@ -34,5 +34,12 @@ public interface MainDao {
    int selectCount(@Param("id") int id);
    void updatetime(@Param("name") String name,@Param("id") int id);
    void updatetime1(@Param("id") int id,@Param("date") Date date);
-   List<Students> selectStudents(Assist assist);
+//   List<Students> selectStudents(Assist assist);
+    //校园后台登陆
+   List<User>  selectUser(Assist assist);
+    //校园后台用户管理
+//List<User> pageUser(Assist assist);
+    int userCount();
+    //邮箱搜索用户
+    void deleteUser(@Param("list") List<Integer> list);
 }

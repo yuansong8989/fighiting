@@ -22,6 +22,6 @@ public class FristRun implements ApplicationRunner {
     public void run(ApplicationArguments applicationArguments) throws Exception {
     log.info("开始初始化程序");
     //判断数据库中在线情况 运行脚本
-    serviceImplements.init();
+//    serviceImplements.init();
     }
 }
