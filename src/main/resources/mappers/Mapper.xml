@@ -188,4 +188,14 @@ student.name as name
             #{id}
         </foreach>
     </delete>
+    <!--批量修改用户权限-->
+    <update id="updateBanLogin" parameterType="arraylist">
+        UPDATE user set user.banlogin=0 WHERE id in
+        <foreach collection="list" open="(" close=")" separator="," item="id" >
+            #{id}
+        </foreach>
+    </update>
+    <insert id="registUser" parameterType="com.springys.entity.User">
+        INSERT INTO user (user.username,user.password,user.email) VALUES (#{user.username},#{user.password},#{user.email})
+    </insert>
 </mapper>

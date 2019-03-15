@@ -8,8 +8,9 @@ import lombok.Data;
 @Data
 public class SearchUser {
     private  String term;
-    private int desc;//等级降序
-    private  int asc;//等级升序
+    private Integer desc;//等级降序
+    private  Integer asc;//等级升序
     private int safeindex;//安全指数
+    private  int pageNum;
 
 }

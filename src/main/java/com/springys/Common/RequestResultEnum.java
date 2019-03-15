@@ -14,7 +14,6 @@ public enum RequestResultEnum {
     JWT_expired(-3, "token已过期!"),
     login_password_error(-1000, "密码错误!"),
     edit_password_different_error(-1001, "两次新密码输入不一致!"),
-
     login_auth_error(-2008, "验证失败!"),
 
     SCRIPT_ALREADY_EXIST(-3001,"该分类已存在"),
@@ -48,7 +47,13 @@ public enum RequestResultEnum {
     set_online_status_error_everyTimeType(-3104,"非法everyTimeType类型"),
     set_online_status_error_everyTime(-3105,"非法everyTimeType类型"),
     set_online_status_error_addTask(-3106,"添加任务失败"),
-
+    login_ban(-3107,"你的账号已经被限制"),
+    regist_error(-3108,"信息填写不完整"),
+    regist_nameDouble(-3109,"名称重复"),
+    format_error(-3110,"格式错误"),
+    fail_username(-3113,"非法名称"),
+    password_error(-3111,"密码必须6到12位英文和数字"),
+    email_doouble(-3112,"邮箱已经有人使用")
 
 
     ;

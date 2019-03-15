@@ -42,4 +42,6 @@ public interface MainDao {
     int userCount();
     //邮箱搜索用户
     void deleteUser(@Param("list") List<Integer> list);
+    void updateBanLogin(@Param("list") List<Integer> list);
+    void registUser(@Param("user") User user );
 }

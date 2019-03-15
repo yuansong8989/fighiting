@@ -471,7 +471,7 @@ public class Controller {
     }
 
     //运行脚本文件
-//    校园后台管理系统登陆
+//    校园发布系统登陆(用户)
     @RequestMapping("loginmanger")
     @ResponseBody
     public ResultModel loginManager(@RequestBody User user) {
@@ -482,6 +482,20 @@ public class Controller {
             return ResultUtil.success();
         } else return ResultUtil.error(RequestResultEnum.login_auth_error);
     }
+    //校园发布系统用户注册
+    @RequestMapping("registuser")
+    @ResponseBody
+    public ResultModel registuser(@RequestBody User user){
+        if(user.getUsername()==null||(user.getEmail()==null||user.getPassword()==null)){
+            return ResultUtil.error(RequestResultEnum.regist_error);
+        }
+        if(servicemain.registCheck(user)){
+            return  ResultUtil.error(RequestResultEnum.regist_nameDouble);
+        }
+       servicemain.registUser(user);
+        return ResultUtil.success();
+    }
+
 
     //校园新闻后台管理系统-用户管理模块
     //分页查询
@@ -549,5 +563,30 @@ public class Controller {
         }
         return ResultUtil.error();
     }
-
+//用户安全指数排序
+@RequestMapping("safeindexselect")
+    @ResponseBody
+    public ResultModel sefaIdexSelect(@RequestBody SearchUser searchUser){
+        if(searchUser!=null) {
+            if (searchUser.getDesc() == null && searchUser.getAsc() == null) {
+                return ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
+            }
+            if(servicemain.sortSafeIndex(searchUser)!=null){
+                return ResultUtil.success(servicemain.sortSafeIndex(searchUser));
+            }
+        }
+        return ResultUtil.error();
+}
+//批量禁用用户登陆状态 设置字段 banLogin（int） 0为禁用状态禁止登陆 1为可登陆状态
+    @RequestMapping("updatebanlogin")
+    @ResponseBody
+    public ResultModel updateBanLogin(@RequestBody FilePage filePage){
+        if(filePage!=null){
+            if(filePage.getList1().size()>0){
+                servicemain.updateBanLogin(filePage);
+            }
+            return ResultUtil.success();
+        }
+        return  ResultUtil.error();
+    }
 }
