@@ -133,7 +133,9 @@ student.name as name
         user.password as password,
         user.email as email,
         user.grade as grade,
-        user.safeindex as safeindex
+        user.safeindex as safeindex,
+        user.banlogin as banlogin,
+        user.studentid as studentid
     </sql>
     <resultMap id="result_user" type="com.springys.entity.User">
         <id column="id" property="id"/>
@@ -142,6 +144,8 @@ student.name as name
         <result column="email" property="email"/>
         <result property="grade" column="grade"/>
         <result property="safeindex" column="safeindex"/>
+        <result property="studentid" column="studentid"/>
+        <result property="banlogin" column="banlogin"/>
 
     </resultMap>
     <select id="selectUser" parameterType="com.springys.Common.Assist"  resultMap="result_user">
@@ -196,6 +200,6 @@ student.name as name
         </foreach>
     </update>
     <insert id="registUser" parameterType="com.springys.entity.User">
-        INSERT INTO user (user.username,user.password,user.email) VALUES (#{user.username},#{user.password},#{user.email})
+        INSERT INTO user (user.username,user.password,user.email,user.studentid) VALUES (#{user.username},#{user.password},#{user.email},#{user.studentid})
     </insert>
 </mapper>

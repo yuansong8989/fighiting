@@ -205,11 +205,11 @@ public class ServiceImplements implements Servicemain {
     public boolean selectUser(User user) {
 
         Assist assist = new Assist();
-        assist.andEq("username", user.getUsername());
+        assist.andEq("studentid", user.getStudentid());
         assist.andEq("password", user.getPassword());
         User user1 = mainDao.selectUser(assist).get(0);
         if (user1 != null) {
-            if (user1.getUsername().equals(user.getUsername()) && user1.getPassword().equals(user.getPassword())) {
+            if (user1.getStudentid().equals(user.getStudentid()) && user1.getPassword().equals(user.getPassword())) {
                 if (user1.getBanlogin() == 0) {
                     throw new ComputeException(RequestResultEnum.login_ban);
                 }
@@ -224,24 +224,26 @@ public class ServiceImplements implements Servicemain {
         String check = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z_]{6,12}$";
         Pattern regex = Pattern.compile(check);
         Matcher matcher = regex.matcher(user.getPassword());
-        if (this.nameSizeCheck(user.getUsername()) && this.passwordSizeCheck(user.getPassword())) {
+        if (this.nameSizeCheck(user.getStudentid()) && this.passwordSizeCheck(user.getPassword())) {
+            if (this.failString(user.getUsername())){
 //            if (this.failString(user.getUsername())) {
                 if (this.emailCheck(user.getEmail())) {
                     if (matcher.matches()) {
-                        if(this.emaildoubleCheck(user)){
+                        if (this.emaildoubleCheck(user)) {
                             mainDao.registUser(user);
-                        }
-                        else {
+                        } else {
                             throw new ComputeException(RequestResultEnum.email_doouble);
                         }
-                    }
-                    else {
+                    } else {
                         throw new ComputeException(RequestResultEnum.password_error);
                     }
-                }
-                else {
+                } else {
                     throw new ComputeException(RequestResultEnum.format_error);
                 }
+        }
+            else{
+                throw new ComputeException(RequestResultEnum.fail_username);
+            }
 //            }
 //            else {
 //                throw new ComputeException(RequestResultEnum.fail_username);
@@ -252,39 +254,39 @@ public class ServiceImplements implements Servicemain {
             throw new ComputeException(RequestResultEnum.format_error);
         }
     }
-//    //恶性中文名判断
-//    public boolean  failString(String sentence){
-//        if(sentence!=null){
-//            if(sentence.indexOf("sb")!=-1||sentence.indexOf("hmp")!=-1){
-//                return false;
-//            }
-//            if(sentence.indexOf("尼玛")!=-1||sentence.indexOf("草")!=-1){
-//                return false;
-//            }
-//            if(sentence.indexOf("我日")!=-1||sentence.indexOf("傻逼")!=-1){
-//                return false;
-//            }
-//            if(sentence.indexOf("煞笔")!=-1||sentence.indexOf("傻比")!=-1){
-//                return false;
-//            }
-//            if(sentence.indexOf("强奸")!=-1||sentence.indexOf("约炮")!=-1){
-//                return false;
-//            }
-//            if(sentence.indexOf("吸毒")!=-1||sentence.indexOf("出售")!=-1){
-//                return false;
-//            }
-//            if(sentence.indexOf("上床")!=-1||sentence.indexOf("我靠")!=-1){
-//                return false;
-//            }
-//            return true;
-//        }
-//        return false;
-//    }
+    //恶性中文名判断
+    public boolean  failString(String sentence){
+        if(sentence!=null){
+            if(sentence.indexOf("sb")!=-1||sentence.indexOf("hmp")!=-1){
+                return false;
+            }
+            if(sentence.indexOf("尼玛")!=-1||sentence.indexOf("草")!=-1){
+                return false;
+            }
+            if(sentence.indexOf("我日")!=-1||sentence.indexOf("傻逼")!=-1){
+                return false;
+            }
+            if(sentence.indexOf("煞笔")!=-1||sentence.indexOf("傻比")!=-1){
+                return false;
+            }
+            if(sentence.indexOf("强奸")!=-1||sentence.indexOf("约炮")!=-1){
+                return false;
+            }
+            if(sentence.indexOf("吸毒")!=-1||sentence.indexOf("出售")!=-1){
+                return false;
+            }
+            if(sentence.indexOf("上床")!=-1||sentence.indexOf("我靠")!=-1){
+                return false;
+            }
+            return true;
+        }
+        return false;
+    }
     //字符串长度名称 格式校验
-    public boolean nameSizeCheck(String name){
+    public boolean nameSizeCheck(String studentid){
         Pattern pattern = Pattern.compile("[0-9]*");
-        Matcher isNum = pattern.matcher(name);
-        if(name.length()==12 && isNum.matches()){
+        Matcher isNum = pattern.matcher(studentid);
+        if(studentid.length()==12 && isNum.matches()){
             return true;
         }
         return false;
@@ -306,11 +308,11 @@ public class ServiceImplements implements Servicemain {
     public boolean registCheck(User user) {
 
         Assist assist = new Assist();
-        assist.andEq("username", user.getUsername());
+        assist.andEq("studentid", user.getStudentid());
         assist.andEq("password", user.getPassword());
         List<User> list = mainDao.selectUser(assist);
         if (list.size()!=0) {
-            if (list.get(0).getUsername().equals(user.getUsername())) {
+            if (list.get(0).getUsername().equals(user.getStudentid())) {
                 return true;
             }
             return false;
@@ -394,17 +396,25 @@ public class ServiceImplements implements Servicemain {
     public User emailSearch(String a) {
         Assist assist = new Assist();
         assist.andEq("email", a);
-        if (mainDao.selectUser(assist) != null) {
+        if (mainDao.selectUser(assist) .size()>0) {
             return mainDao.selectUser(assist).get(0);
         }
         return null;
     }
-
+//按照昵称筛选
+public List<User> usernameSearch(String a) {
+    Assist assist = new Assist();
+    assist.andLike("username","%"+a+"%");
+    if (mainDao.selectUser(assist).size()>0) {
+        return mainDao.selectUser(assist);
+    }
+    return null;
+}
     //按照学号搜索筛选
     public User studentIdSearch(String a) {
         Assist assist = new Assist();
-        assist.andEq("username", a);
-        if (mainDao.selectUser(assist) != null) {
+        assist.andEq("studentid", a);
+        if (mainDao.selectUser(assist).size()>0) {
             return mainDao.selectUser(assist).get(0);
         }
         return null;

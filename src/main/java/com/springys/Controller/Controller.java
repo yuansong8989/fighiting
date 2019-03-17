@@ -475,24 +475,25 @@ public class Controller {
     @RequestMapping("loginmanger")
     @ResponseBody
     public ResultModel loginManager(@RequestBody User user) {
-        if (user.getUsername() == null || user.getPassword() == null) {
+        if (user.getStudentid() == null || user.getPassword() == null) {
             return ResultUtil.error();
         }
         if (servicemain.selectUser(user)) {
             return ResultUtil.success();
         } else return ResultUtil.error(RequestResultEnum.login_auth_error);
     }
+
     //校园发布系统用户注册
     @RequestMapping("registuser")
     @ResponseBody
-    public ResultModel registuser(@RequestBody User user){
-        if(user.getUsername()==null||(user.getEmail()==null||user.getPassword()==null)){
+    public ResultModel registuser(@RequestBody User user) {
+        if (user.getStudentid() == null || (user.getEmail() == null || user.getPassword() == null)) {
             return ResultUtil.error(RequestResultEnum.regist_error);
         }
-        if(servicemain.registCheck(user)){
-            return  ResultUtil.error(RequestResultEnum.regist_nameDouble);
+        if (servicemain.registCheck(user)) {
+            return ResultUtil.error(RequestResultEnum.regist_nameDouble);
         }
-       servicemain.registUser(user);
+        servicemain.registUser(user);
         return ResultUtil.success();
     }
 
@@ -511,7 +512,7 @@ public class Controller {
         return ResultUtil.error(RequestResultEnum.EDIT_FAIL);
     }
 
-    //用户搜索 按照姓名 或者 邮箱来搜索 设定用户名 以及邮箱不能一致
+    //用户搜索 按照姓名 或者 邮箱来搜索 或者学号 设定用户名 以及邮箱不能一致 输入
     @RequestMapping("usersearch")
     @ResponseBody
     public ResultModel userSearch(@RequestBody SearchUser searchUser) {
@@ -519,19 +520,20 @@ public class Controller {
             return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
         }
         if (searchUser.getTerm() != null) {
-            if (searchUser.getTerm().length() == 12) {
-                //学号搜索
-                if (servicemain.studentIdSearch(searchUser.getTerm()) != null) {
-                    return ResultUtil.success(servicemain.studentIdSearch(searchUser.getTerm()));
-                }
+            List<User> users = new ArrayList<>();
+            if(servicemain.usernameSearch(searchUser.getTerm())!=null) {
+                users = servicemain.usernameSearch(searchUser.getTerm());
             }
-            if (searchUser.getTerm().length() > 12) {
-                //邮箱搜索
-                if (servicemain.emailSearch(searchUser.getTerm()) != null) {
-                    return ResultUtil.success(servicemain.emailSearch(searchUser.getTerm()));
-                }
+            if (servicemain.studentIdSearch(searchUser.getTerm()) != null) {
+                User a = servicemain.studentIdSearch(searchUser.getTerm());
+                users.add(a);
+
             }
-            return ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
+            if (servicemain.emailSearch(searchUser.getTerm()) != null) {
+                User b = servicemain.emailSearch(searchUser.getTerm());
+                users.add(b);
+            }
+            return ResultUtil.success(users);
         }
         return ResultUtil.error();
     }
@@ -563,30 +565,33 @@ public class Controller {
         }
         return ResultUtil.error();
     }
-//用户安全指数排序
-@RequestMapping("safeindexselect")
+
+    //用户安全指数排序
+    @RequestMapping("safeindexselect")
     @ResponseBody
-    public ResultModel sefaIdexSelect(@RequestBody SearchUser searchUser){
-        if(searchUser!=null) {
+    public ResultModel sefaIdexSelect(@RequestBody SearchUser searchUser) {
+        if (searchUser != null) {
             if (searchUser.getDesc() == null && searchUser.getAsc() == null) {
                 return ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
             }
-            if(servicemain.sortSafeIndex(searchUser)!=null){
+            if (servicemain.sortSafeIndex(searchUser) != null) {
                 return ResultUtil.success(servicemain.sortSafeIndex(searchUser));
             }
         }
         return ResultUtil.error();
-}
-//批量禁用用户登陆状态 设置字段 banLogin（int） 0为禁用状态禁止登陆 1为可登陆状态
+    }
+
+    //批量禁用用户登陆状态 设置字段 banLogin（int） 0为禁用状态禁止登陆 1为可登陆状态
     @RequestMapping("updatebanlogin")
     @ResponseBody
-    public ResultModel updateBanLogin(@RequestBody FilePage filePage){
-        if(filePage!=null){
-            if(filePage.getList1().size()>0){
+    public ResultModel updateBanLogin(@RequestBody FilePage filePage) {
+        if (filePage != null) {
+            if (filePage.getList1().size() > 0) {
                 servicemain.updateBanLogin(filePage);
             }
             return ResultUtil.success();
         }
-        return  ResultUtil.error();
+        return ResultUtil.error();
     }
+    //
 }

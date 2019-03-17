@@ -51,9 +51,9 @@ public enum RequestResultEnum {
     regist_error(-3108,"信息填写不完整"),
     regist_nameDouble(-3109,"名称重复"),
     format_error(-3110,"格式错误"),
-    fail_username(-3113,"非法名称"),
+    fail_username(-3113,"非法昵称"),
     password_error(-3111,"密码必须6到12位英文和数字"),
-    email_doouble(-3112,"邮箱已经有人使用")
+    email_doouble(-3112,"邮箱已经有人使用"),
 
 
     ;
