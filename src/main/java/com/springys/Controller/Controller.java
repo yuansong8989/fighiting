@@ -600,18 +600,79 @@ public class Controller {
         return ResultUtil.error();
     }
     //校园新闻后台管理系统-新闻管理模块
-    //新闻添加
+    //新闻添加(管理员添加和 用户添加) 都添加至表allnews
+    //管理员添加
     @RequestMapping("newsAdd")
     @ResponseBody
-    public ResultModel newsAdd(@RequestBody News news){
+    public ResultModel newsAdd(@RequestBody News news,@RequestParam("file") MultipartFile[] files){
         if(news!=null){
-            if(servicemain.addNews(news)){
+            try{
+                if(servicemain.addNews(news,files)){
+                    return ResultUtil.success();
+                }
+            }catch (IOException e){
+                e.printStackTrace();
+            }
+            return ResultUtil.error();
+        }
+        return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
+    }
+    //图片添加接口
+
+    //用户添加新闻
+    @RequestMapping("usernewsAdd")
+    @ResponseBody
+    public ResultModel userNewsAdd(@RequestBody News news){
+        if(news!=null){
+            if(servicemain.userAddNews(news)){
                 return ResultUtil.success();
             }
             return ResultUtil.error();
         }
-    return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
+        return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
     }
+//新闻分页显示全部
+    @RequestMapping("pagenews")
+    @ResponseBody
+    public ResultModel pageNews(@RequestBody PageParameter pageParameter){
+        if (pageParameter.getPageNum() == 0 || pageParameter.getPagesize() == 0) {
+            ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
+        } else {
+            FilePage filePage = servicemain.pageNews(pageParameter.getPageNum(), pageParameter.getPagesize());
+            return ResultUtil.success(filePage);
+        }
+        return ResultUtil.error(RequestResultEnum.EDIT_FAIL);
+    }
+    //新闻筛选 按照 作者 和分类
+    @RequestMapping("findnews")
+    @ResponseBody
+    public ResultModel findNews(@RequestBody News news){
+        //根据传入条件查找
+        return ResultUtil.success(servicemain.findNews(news));
+    }
+    //新闻批量删除
+    @RequestMapping("deletenews")
+    @ResponseBody
+    public ResultModel deleteNews(@RequestBody FilePage filePage){
+        if (filePage == null) {
+            return ResultUtil.error(RequestResultEnum.DELETE_FAIL);
+        }
+        if (servicemain.deleteNews(filePage)) {
+            return ResultUtil.success();
+        }
+        return ResultUtil.error();
+    }
+    //新闻修改 主要修改 新闻内容 新闻标题 新闻图片
+//    @RequestMapping("updatenews")
+//    @ResponseBody
+//    public ResultModel updateNews(@RequestBody News news){
+//        if(news==null)
+//    }
+    //新闻查看
+    //---新闻审核系统
+    //分页显示全部新闻
+    //删除新闻 给读者发送消息
+    //新闻审核通过 插入 主表新闻 给读者发布消息
 
 
 }

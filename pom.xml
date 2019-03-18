@@ -147,7 +147,11 @@
             <version>1.11</version>
         </dependency>
         <!--kettle-->
-
+        <dependency>
+            <groupId>org.shenjia</groupId>
+            <artifactId>MyBatisX</artifactId>
+            <version>0.0.5</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

@@ -48,5 +48,10 @@ public interface MainDao {
     //新闻管理模块
     List<News> selectNews(Assist assist);
     //增加新闻
-    void insertNews(@Param("news") News news);
+    int insertNews(@Param("news") News news);
+    //增加用户发布新闻数量
+    int updateNewsnum(@Param("studentid") String studentid);
+    //新闻数量
+    int newsCount();
+    int deleteNews(@Param("list") List<Integer> list);
 }

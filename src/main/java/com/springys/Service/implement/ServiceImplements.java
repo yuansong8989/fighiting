@@ -1,5 +1,7 @@
 package com.springys.Service.implement;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.springys.Common.Assist;
@@ -10,12 +12,16 @@ import com.springys.Service.Servicemain;
 import com.springys.entity.*;
 import com.springys.exception.ComputeException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.quartz.SchedulerException;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -215,20 +221,21 @@ public class ServiceImplements implements Servicemain {
                 }
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 String currentTime = sdf.format(new Date());
-                mainDao.updateLasttime(currentTime,user1.getId());
+                mainDao.updateLasttime(currentTime, user1.getId());
                 return true;
             }
             return false;
         }
         return false;
     }
+
     //校园发布系统用户注册
     public void registUser(User user) {
         String check = "^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z_]{6,12}$";
         Pattern regex = Pattern.compile(check);
         Matcher matcher = regex.matcher(user.getPassword());
         if (this.nameSizeCheck(user.getStudentid()) && this.passwordSizeCheck(user.getPassword())) {
-            if (this.failString(user.getUsername())){
+            if (this.failString(user.getUsername())) {
 //            if (this.failString(user.getUsername())) {
                 if (this.emailCheck(user.getEmail())) {
                     if (matcher.matches()) {
@@ -243,8 +250,7 @@ public class ServiceImplements implements Servicemain {
                 } else {
                     throw new ComputeException(RequestResultEnum.format_error);
                 }
-        }
-            else{
+            } else {
                 throw new ComputeException(RequestResultEnum.fail_username);
             }
 //            }
@@ -252,53 +258,55 @@ public class ServiceImplements implements Servicemain {
 //                throw new ComputeException(RequestResultEnum.fail_username);
 //            }
 //     boolean a=   user.getPassword().matches("[a-zA-Z0-9]+");
-        }
-        else {
+        } else {
             throw new ComputeException(RequestResultEnum.format_error);
         }
     }
+
     //恶性中文名判断
-    public boolean  failString(String sentence){
-        if(sentence!=null){
-            if(sentence.indexOf("sb")!=-1||sentence.indexOf("hmp")!=-1){
+    public boolean failString(String sentence) {
+        if (sentence != null) {
+            if (sentence.indexOf("sb") != -1 || sentence.indexOf("hmp") != -1) {
                 return false;
             }
-            if(sentence.indexOf("尼玛")!=-1||sentence.indexOf("草")!=-1){
+            if (sentence.indexOf("尼玛") != -1 || sentence.indexOf("草") != -1) {
                 return false;
             }
-            if(sentence.indexOf("我日")!=-1||sentence.indexOf("傻逼")!=-1){
+            if (sentence.indexOf("我日") != -1 || sentence.indexOf("傻逼") != -1) {
                 return false;
             }
-            if(sentence.indexOf("煞笔")!=-1||sentence.indexOf("傻比")!=-1){
+            if (sentence.indexOf("煞笔") != -1 || sentence.indexOf("傻比") != -1) {
                 return false;
             }
-            if(sentence.indexOf("强奸")!=-1||sentence.indexOf("约炮")!=-1){
+            if (sentence.indexOf("强奸") != -1 || sentence.indexOf("约炮") != -1) {
                 return false;
             }
-            if(sentence.indexOf("吸毒")!=-1||sentence.indexOf("出售")!=-1){
+            if (sentence.indexOf("吸毒") != -1 || sentence.indexOf("出售") != -1) {
                 return false;
             }
-            if(sentence.indexOf("上床")!=-1||sentence.indexOf("我靠")!=-1){
+            if (sentence.indexOf("上床") != -1 || sentence.indexOf("我靠") != -1) {
                 return false;
             }
             return true;
         }
         return false;
     }
+
     //字符串长度名称 格式校验
-    public boolean nameSizeCheck(String studentid){
+    public boolean nameSizeCheck(String studentid) {
         Pattern pattern = Pattern.compile("[0-9]*");
         Matcher isNum = pattern.matcher(studentid);
-        if(studentid.length()==12 && isNum.matches()){
+        if (studentid.length() == 12 && isNum.matches()) {
             return true;
         }
         return false;
     }
+
     //字符串密码 长度判断
-    public boolean passwordSizeCheck(String password){
-        if(password.length()>0){
-            if(password.length()>=6){
-                if(password.length()<=12){
+    public boolean passwordSizeCheck(String password) {
+        if (password.length() > 0) {
+            if (password.length() >= 6) {
+                if (password.length() <= 12) {
                     return true;
                 }
                 return false;
@@ -307,6 +315,7 @@ public class ServiceImplements implements Servicemain {
         }
         return false;
     }
+
     //注册重复名称校验
     public boolean registCheck(User user) {
 
@@ -314,7 +323,7 @@ public class ServiceImplements implements Servicemain {
         assist.andEq("studentid", user.getStudentid());
         assist.andEq("password", user.getPassword());
         List<User> list = mainDao.selectUser(assist);
-        if (list.size()!=0) {
+        if (list.size() != 0) {
             if (list.get(0).getUsername().equals(user.getStudentid())) {
                 return true;
             }
@@ -322,12 +331,13 @@ public class ServiceImplements implements Servicemain {
         }
         return false;
     }
+
     //重复邮箱校验 查得邮箱返回true
     public boolean emaildoubleCheck(User user) {
         Assist assist = new Assist();
         assist.andEq("email", user.getEmail());
-        List<User> list= mainDao.selectUser(assist);
-        if (list.size()==0) {
+        List<User> list = mainDao.selectUser(assist);
+        if (list.size() == 0) {
 //            if (list.get(0).getEmail().equals(user.getEmail())) {
 //                return true;
 //            }
@@ -335,6 +345,7 @@ public class ServiceImplements implements Servicemain {
         }
         return false;
     }
+
     @Override
     public FilePage pageFIle(int pageNum, int pageSize, int id) {
         PageHelper.startPage(pageNum, pageSize);
@@ -356,6 +367,7 @@ public class ServiceImplements implements Servicemain {
         return filePage;
     }
 
+    //分页用户
     @Override
     public FilePage pageUser(int pageNum, int pageSize) {
         Assist assist = new Assist();
@@ -368,12 +380,24 @@ public class ServiceImplements implements Servicemain {
         return filePage;
     }
 
+    //分页新闻
+    public FilePage pageNews(int pageNum, int pageSize) {
+        Assist assist = new Assist();
+        PageHelper.startPage(pageNum, pageSize);
+        List<News> news = mainDao.selectNews(assist);
+        int count = mainDao.newsCount();//总数
+        FilePage filePage = new FilePage();
+        filePage.setTotal(count);
+        filePage.setNews(news);
+        return filePage;
+    }
+
     //邮箱格式检验
     public boolean emailCheck(String email) {
         if (email == null) {
             return false;
         }
-        if (email.endsWith("@qq.com")&&email.length()<=18) {
+        if (email.endsWith("@qq.com") && email.length() <= 18) {
             return true;
         }
         return false;
@@ -399,27 +423,29 @@ public class ServiceImplements implements Servicemain {
     public List<User> emailSearch(String a) {
         Assist assist = new Assist();
 //        assist.andEq("email", a);
-        assist.andLike("email","%"+a+"%");
-        if (mainDao.selectUser(assist) .size()>0) {
+        assist.andLike("email", "%" + a + "%");
+        if (mainDao.selectUser(assist).size() > 0) {
             return mainDao.selectUser(assist);
         }
         return null;
     }
-//按照昵称筛选
-public List<User> usernameSearch(String a) {
-    Assist assist = new Assist();
-    assist.andLike("username","%"+a+"%");
-    if (mainDao.selectUser(assist).size()>0) {
-        return mainDao.selectUser(assist);
+
+    //按照昵称筛选
+    public List<User> usernameSearch(String a) {
+        Assist assist = new Assist();
+        assist.andLike("username", "%" + a + "%");
+        if (mainDao.selectUser(assist).size() > 0) {
+            return mainDao.selectUser(assist);
+        }
+        return null;
     }
-    return null;
-}
+
     //按照学号搜索筛选
     public List<User> studentIdSearch(String a) {
         Assist assist = new Assist();
 //        assist.andEq("studentid", a);
-        assist.andLike("studentid","%"+a+"%");
-        if (mainDao.selectUser(assist).size()>0) {
+        assist.andLike("studentid", "%" + a + "%");
+        if (mainDao.selectUser(assist).size() > 0) {
             return mainDao.selectUser(assist);
         }
         return null;
@@ -438,7 +464,22 @@ public List<User> usernameSearch(String a) {
         }
         return false;
     }
-
+//批量删除新闻
+public boolean deleteNews(FilePage filePage) {
+    if (filePage != null) {
+        List<News> news = filePage.getNews();
+        List<Integer> list1 = new ArrayList<>();
+        for (News news1 : news) {
+            list1.add(news1.getId());
+        }
+       int a= mainDao.deleteNews(list1);
+        if(a>0){
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
     //等级升降筛选
     public List<User> sortgrade(SearchUser searchUser) {
         Assist assist = new Assist();
@@ -497,19 +538,94 @@ public List<User> usernameSearch(String a) {
             mainDao.updateBanLogin(list1);
         }
     }
-//校园新闻 后台 新闻板块
+
+    //校园新闻 后台 新闻板块
     //root 新闻添加
-    public boolean addNews(News news){
-        if(news.getMessage()==null){
-            throw  new ComputeException(RequestResultEnum.message_EMPTY);
+    public boolean addNews(News news, MultipartFile [] files) throws IOException {
+        Picture picture=new Picture();
+        for (int i = 0; i < files.length; i++) {
+//                    multipartFile[i].transferTo(new File("path"));
+            FileUtils.writeByteArrayToFile(new File("g:/upload/" + files[i].getOriginalFilename()), files[i].getBytes());//字节数组
+//           this.InsertFileName(files[i].getOriginalFilename());
+            //对象转String存入picturepath
+            picture.getPicturePaths().add(files[i].getOriginalFilename());
         }
-        if(news.getTitle()==null){
-            throw  new ComputeException(RequestResultEnum.title_EMPTY);
+        String s= JSON.toJSONString(picture);
+        if (news.getMessage() == null) {
+            throw new ComputeException(RequestResultEnum.message_EMPTY);
+        }
+        if (news.getTitle() == null) {
+            throw new ComputeException(RequestResultEnum.title_EMPTY);
         }
         news.setBelong(1);
         news.setAuthor("管理员");
-        mainDao.insertNews(news);
-        return true;
+        news.setPicturepath(s);
+        if (mainDao.insertNews(news) > 0) {
+            return true;
+        }
+//        mainDao.insertNews(news);
+        return false;
     }
+
+    //用户新闻添加 传入作者学号 且发布新闻数量加1
+    public boolean userAddNews(News news) {
+        if (news.getMessage() == null) {
+            throw new ComputeException(RequestResultEnum.message_EMPTY);
+        }
+        if (news.getTitle() == null) {
+            throw new ComputeException(RequestResultEnum.title_EMPTY);
+        }
+//        news.setBelong(1);
+//        news.setAuthor("管理员");
+
+        if (mainDao.insertNews(news) > 0) {
+            if (mainDao.updateNewsnum(news.getAuthor()) > 0) {
+                return true;
+            }
+            return false;
+        }
+//        mainDao.insertNews(news);
+        return false;
+    }
+
+    //新闻筛选查询 传入 标题 以及分类 以及作者
+    public List<News> findNews(News news) {
+        List<News> list = new ArrayList<>();
+        if (news.getTitle() != null) {
+            Assist assist = new Assist();
+            assist.andLike("title", "%" + news.getTitle() + "%");
+            List<News> news1 = mainDao.selectNews(assist);
+            if (news1 != null) {
+                list = news1;
+            }
+        }
+        if (news.getAuthor() != null) {
+            Assist assist = new Assist();
+            assist.andEq("author", news.getAuthor());
+            List<News> list1 = mainDao.selectNews(assist);
+            if (list1 != null) {
+                for (News news1 : list1) {
+                    list.add(news1);
+                }
+            }
+        }
+        if (news.getClassifybelong() > -1) {
+            Assist assist = new Assist();
+            assist.andEq("classifybelong", news.getClassifybelong());
+            List<News> list1 = mainDao.selectNews(assist);
+            if (list1 != null) {
+                for (News news1 : list1) {
+                    list.add(news1);
+                }
+            }
+        }
+        if (news == null) {
+            Assist assist = new Assist();
+            List<News> list1 = mainDao.selectNews(assist);
+            list = list1;
+        }
+        return list;
+    }
+
 }
 

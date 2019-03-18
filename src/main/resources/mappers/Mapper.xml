@@ -195,6 +195,9 @@ student.name as name
     <select id="userCount" resultType="int">
         SELECT count(username) FROM user WHERE user.username is NOT NULL
     </select>
+    <select id="newsCount" resultType="int">
+        SELECT count(message) FROM allnews WHERE allnews.message is NOT NULL
+    </select>
     <!--批量删除用户-->
     <delete id="deleteUser" parameterType="arraylist">
         DELETE FROM user WHERE id in
@@ -281,4 +284,14 @@ student.name as name
     <insert id="insertNews" parameterType="com.springys.entity.News">
         INSERT  INTO allnews (allnews.message,allnews.picturepath,allnews.vediopath,allnews.belong,allnews.author,allnews.title,allnews.classifybelong) VALUES (#{news.message},#{news.picturepath},#{news.vediopath},#{news.belong},#{news.author},#{news.title},#{news.classifybelong})
     </insert>
+    <!--增加用户新闻发布数量-->
+    <update id="updateNewsnum" >
+        update user set user.newsnum=user.newsnum+1 where user.studentid=#{studentid}
+    </update>
+    <delete id="deleteNews" parameterType="arraylist">
+        DELETE FROM allnews WHERE id in
+        <foreach collection="list" open="(" close=")" separator="," item="id" >
+            #{id}
+        </foreach>
+    </delete>
 </mapper>
