@@ -54,6 +54,8 @@ public enum RequestResultEnum {
     fail_username(-3113,"非法昵称"),
     password_error(-3111,"密码必须6到12位英文和数字"),
     email_doouble(-3112,"邮箱已经有人使用"),
+    message_EMPTY(-3114,"内容不能为空"),
+    title_EMPTY(-3115,"标题不能为空")
 
 
     ;

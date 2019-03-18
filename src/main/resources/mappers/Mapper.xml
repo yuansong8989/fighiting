@@ -127,6 +127,7 @@ student.name as name
         <result property="password" column="password"/>
         <result property="name" column="name"/>
     </resultMap>
+    <!--用户管理模块-->
     <sql id="User">
         user.id as id,
         user.username as username,
@@ -135,7 +136,12 @@ student.name as name
         user.grade as grade,
         user.safeindex as safeindex,
         user.banlogin as banlogin,
-        user.studentid as studentid
+        user.studentid as studentid,
+        user.newsnum as newsnum,
+        user.discussnum as discussnum,
+        user.seenum as seenum,
+        user.createtime as createtime,
+        user.lastlogintime as lastlogintime
     </sql>
     <resultMap id="result_user" type="com.springys.entity.User">
         <id column="id" property="id"/>
@@ -146,7 +152,11 @@ student.name as name
         <result property="safeindex" column="safeindex"/>
         <result property="studentid" column="studentid"/>
         <result property="banlogin" column="banlogin"/>
-
+        <result property="lastlogintime" column="lastlogintime"/>
+        <result property="createtime" column="createtime"/>
+        <result property="newsnum" column="newsnum"/>
+        <result property="seenum" column="seenum"/>
+        <result property="discussnum" column="discussnum"/>
     </resultMap>
     <select id="selectUser" parameterType="com.springys.Common.Assist"  resultMap="result_user">
         select  <if test="distinct !=null">${distinct}</if>
@@ -201,5 +211,74 @@ student.name as name
     </update>
     <insert id="registUser" parameterType="com.springys.entity.User">
         INSERT INTO user (user.username,user.password,user.email,user.studentid) VALUES (#{user.username},#{user.password},#{user.email},#{user.studentid})
+    </insert>
+    <update id="updateLasttime">
+        UPDATE user set user.lastlogintime=#{lastlogintime} where user.id=#{id}
+    </update>
+    <!--新闻模块-->
+    <sql id="News">
+        news.id as id,
+        news.message as message,
+        news.picturepath as picturepath,
+        news.vediopath as vediopath,
+        news.createtime as createtime,
+        news.updatetime as updatetime,
+        news.belong as belong,
+        news.agreenum as agreenum,
+        news.author as author,
+        news.discussnum as discussnum,
+        news.classifybelong as classifybelong,
+        news.title as title
+    </sql>
+    <resultMap id="result_news" type="com.springys.entity.News">
+        <id column="id" property="id"/>
+        <result property="agreenum" column="agreenum"/>
+        <result property="author" column="author"/>
+        <result property="belong" column="belong"/>
+        <result property="createtime" column="createtime"/>
+        <result property="discussnum" column="discussnum"/>
+        <result property="message" column="message"/>
+        <result property="vediopath" column="vediopath"/>
+        <result property="picturepath" column="picturepath"/>
+        <result property="updatetime" column="updatetime"/>
+        <result property="title" column="title"/>
+        <result property="classifybelong" column="classifybelong"/>
+    </resultMap>
+    <select id="selectNews" parameterType="com.springys.Common.Assist"  resultMap="result_news">
+        select  <if test="distinct !=null">${distinct}</if>
+        <choose>
+            <when test="resultColumn!=null">${resultColumn}</when>
+            <otherwise>
+                <include refid="News" />
+            </otherwise>
+        </choose>
+        from allnews
+        <choose>
+            <when test="rowSize ==null">
+                <if test="require!=null">
+                    <include refid="Assist" />
+                </if>
+                <if test="order !=null">${order}</if>
+            </when>
+            <otherwise>
+                inner join
+                (
+                SELECT id as primary_key FROM allnews
+                <if test="require!=null">
+                    <include refid="Assist" />
+                </if>
+                <if test="order !=null">${order}</if>
+                <choose>
+                    <when test="startRow !=null and rowSize !=null">LIMIT #{startRow},#{rowSize} </when>
+                    <when test="rowSize !=null">LIMIT #{rowSize}</when>
+                </choose>
+                ) as tmp
+                on tmp.primary_key=script.id
+            </otherwise>
+        </choose>
+    </select>
+    <!--增加新闻-->
+    <insert id="insertNews" parameterType="com.springys.entity.News">
+        INSERT  INTO allnews (allnews.message,allnews.picturepath,allnews.vediopath,allnews.belong,allnews.author,allnews.title,allnews.classifybelong) VALUES (#{news.message},#{news.picturepath},#{news.vediopath},#{news.belong},#{news.author},#{news.title},#{news.classifybelong})
     </insert>
 </mapper>

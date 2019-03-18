@@ -471,6 +471,7 @@ public class Controller {
     }
 
     //运行脚本文件
+    //发布系统用户（）-----------------------------------------------------------------------------------------------------------------------------------------------------------
 //    校园发布系统登陆(用户)
     @RequestMapping("loginmanger")
     @ResponseBody
@@ -497,7 +498,7 @@ public class Controller {
         return ResultUtil.success();
     }
 
-
+//后台管理-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //校园新闻后台管理系统-用户管理模块
     //分页查询
     @RequestMapping("pageuser")
@@ -525,13 +526,18 @@ public class Controller {
                 users = servicemain.usernameSearch(searchUser.getTerm());
             }
             if (servicemain.studentIdSearch(searchUser.getTerm()) != null) {
-                User a = servicemain.studentIdSearch(searchUser.getTerm());
-                users.add(a);
-
+                List<User> a = servicemain.studentIdSearch(searchUser.getTerm());
+                for(User user : a){
+                    users.add(user);
+                }
+//                users.add(a);
             }
             if (servicemain.emailSearch(searchUser.getTerm()) != null) {
-                User b = servicemain.emailSearch(searchUser.getTerm());
-                users.add(b);
+                List<User> b=servicemain.emailSearch(searchUser.getTerm());
+                for(User user : b){
+                    users.add(user);
+                }
+//                users.add(b);
             }
             return ResultUtil.success(users);
         }
@@ -593,5 +599,19 @@ public class Controller {
         }
         return ResultUtil.error();
     }
-    //
+    //校园新闻后台管理系统-新闻管理模块
+    //新闻添加
+    @RequestMapping("newsAdd")
+    @ResponseBody
+    public ResultModel newsAdd(@RequestBody News news){
+        if(news!=null){
+            if(servicemain.addNews(news)){
+                return ResultUtil.success();
+            }
+            return ResultUtil.error();
+        }
+    return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
+    }
+
+
 }

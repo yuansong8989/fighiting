@@ -44,4 +44,9 @@ public interface MainDao {
     void deleteUser(@Param("list") List<Integer> list);
     void updateBanLogin(@Param("list") List<Integer> list);
     void registUser(@Param("user") User user );
+    void updateLasttime(@Param("lastlogintime") String lastlogintime,@Param("id") int id);
+    //新闻管理模块
+    List<News> selectNews(Assist assist);
+    //增加新闻
+    void insertNews(@Param("news") News news);
 }

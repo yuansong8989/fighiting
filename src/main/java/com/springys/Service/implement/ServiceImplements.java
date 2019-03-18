@@ -213,6 +213,9 @@ public class ServiceImplements implements Servicemain {
                 if (user1.getBanlogin() == 0) {
                     throw new ComputeException(RequestResultEnum.login_ban);
                 }
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                String currentTime = sdf.format(new Date());
+                mainDao.updateLasttime(currentTime,user1.getId());
                 return true;
             }
             return false;
@@ -393,11 +396,12 @@ public class ServiceImplements implements Servicemain {
     }
 
     //按照邮箱筛选 查询
-    public User emailSearch(String a) {
+    public List<User> emailSearch(String a) {
         Assist assist = new Assist();
-        assist.andEq("email", a);
+//        assist.andEq("email", a);
+        assist.andLike("email","%"+a+"%");
         if (mainDao.selectUser(assist) .size()>0) {
-            return mainDao.selectUser(assist).get(0);
+            return mainDao.selectUser(assist);
         }
         return null;
     }
@@ -411,11 +415,12 @@ public List<User> usernameSearch(String a) {
     return null;
 }
     //按照学号搜索筛选
-    public User studentIdSearch(String a) {
+    public List<User> studentIdSearch(String a) {
         Assist assist = new Assist();
-        assist.andEq("studentid", a);
+//        assist.andEq("studentid", a);
+        assist.andLike("studentid","%"+a+"%");
         if (mainDao.selectUser(assist).size()>0) {
-            return mainDao.selectUser(assist).get(0);
+            return mainDao.selectUser(assist);
         }
         return null;
     }
@@ -492,6 +497,19 @@ public List<User> usernameSearch(String a) {
             mainDao.updateBanLogin(list1);
         }
     }
-
+//校园新闻 后台 新闻板块
+    //root 新闻添加
+    public boolean addNews(News news){
+        if(news.getMessage()==null){
+            throw  new ComputeException(RequestResultEnum.message_EMPTY);
+        }
+        if(news.getTitle()==null){
+            throw  new ComputeException(RequestResultEnum.title_EMPTY);
+        }
+        news.setBelong(1);
+        news.setAuthor("管理员");
+        mainDao.insertNews(news);
+        return true;
+    }
 }
 

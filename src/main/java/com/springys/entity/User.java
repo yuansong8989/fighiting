@@ -13,6 +13,11 @@ public class User {
     private String email;//qq邮箱 @qq.com
     private int grade;//无限制
     private int safeindex;//0-5
-    private int banlogin; //可登陆 已禁止
+    private int banlogin; //1可登陆 0已禁止
     private String username;//昵称
+    private int newsnum;//发布新闻数量
+    private int discussnum;//发布评论数量
+    private int seenum;//浏览新闻数量
+    private String  lastlogintime;//上一次登陆时间
+    private String  createtime;//加入系统时间
 }
