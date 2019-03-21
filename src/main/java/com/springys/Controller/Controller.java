@@ -54,7 +54,6 @@ public class Controller {
             return ResultMain.success(MessageCode.success, ruseltData);
         }
     }
-
     @RequestMapping("exitDatabase")
     public Uniti exitDatabase(@RequestBody Five five) {
         if (five.getData() == null) {
@@ -81,16 +80,16 @@ public class Controller {
         }
     }
 
-    @RequestMapping("deleteDatabase")
-    public Uniti deleteDatabase(@RequestBody RequestObject requestObject) {
-        log.info("当前异常是" + requestObject.getData());
-        if (requestObject.getData().getId() > 0) {
-            servicemain.deleteDatabase(requestObject.getData().getId());
-            return ResultMain.success(MessageCode.success, null);
-        } else {
-            return ResultMain.error(MessageCode.error);
-        }
-    }
+//    @RequestMapping("deleteDatabase")
+//    public Uniti deleteDatabase(@RequestBody RequestObject requestObject) {
+//        log.info("当前异常是" + requestObject.getData());
+//        if (requestObject.getData().getId() > 0) {
+//            servicemain.deleteDatabase(requestObject.getData().getId());
+//            return ResultMain.success(MessageCode.success, null);
+//        } else {
+//            return ResultMain.error(MessageCode.error);
+//        }
+//    }
 //书写注册功能 注册用户密码存至redis中 login登陆也是
 
     @RequestMapping("login")
@@ -590,10 +589,10 @@ public class Controller {
     //批量禁用用户登陆状态 设置字段 banLogin（int） 0为禁用状态禁止登陆 1为可登陆状态
     @RequestMapping("updatebanlogin")
     @ResponseBody
-    public ResultModel updateBanLogin(@RequestBody FilePage filePage) {
-        if (filePage != null) {
-            if (filePage.getList1().size() > 0) {
-                servicemain.updateBanLogin(filePage);
+    public ResultModel updateBanLogin(@RequestBody User user) {
+        if (user != null) {
+            if (user.getId() > 0) {
+                servicemain.updateBanLogin(user);
             }
             return ResultUtil.success();
         }

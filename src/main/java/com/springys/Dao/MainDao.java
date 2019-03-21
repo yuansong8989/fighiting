@@ -19,7 +19,7 @@ public interface MainDao {
 
     void exitDatabase(@Param("config") String config, @Param("db_name") String db_name, @Param("alias") String alias, @Param("create_time") Date create_time, @Param("db_type_id") int db_type_id, @Param("dbserver_config_id") int dbserver_config_id, @Param("repository_id") int repository_id, @Param("update_time") Date update_time);
 
-    void deleteDatabase(@Param("id") int id);
+//    void deleteDatabase(@Param("id") int id);
     SelectPassword login(@Param("password")String password);
     BigData Sinformation(@Param("user")String user);
     List<Students> pageSelect(@Param("id") int id);
@@ -42,7 +42,7 @@ public interface MainDao {
     int userCount();
     //邮箱搜索用户
     void deleteUser(@Param("list") List<Integer> list);
-    void updateBanLogin(@Param("list") List<Integer> list);
+    void updateBanLogin(@Param("user") User user);
     void registUser(@Param("user") User user );
     void updateLasttime(@Param("lastlogintime") String lastlogintime,@Param("id") int id);
     //新闻管理模块

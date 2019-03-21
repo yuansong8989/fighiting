@@ -25,11 +25,10 @@
     INSERT INTO db (config,db_name,repository_id,dbserver_config_id,db_type_id,alias,create_time)
     VALUES (#{config},#{db_name},#{repository_id},#{dbserver_config_id},#{db_type_id},#{alias},#{create_time})
 </insert>
-    <delete id="deleteDatabase">
-DELETE FROM db WHERE id=#{id}
-</delete>
     <resultMap id="nnn" type="com.springys.entity.SelectPassword">
-        <result property="create_time" column="create_time"/>
+        <!--<result propertdelete id="deleteDatabase">-->
+            <!--DELETE FROM db WHERE id=#{id}-->
+        <!--</delete>y="create_time" column="create_time"/>-->
         <result property="id" column="id"/>
         <result property="password" column="password"/>
         <result property="update_time" column="update_time"/>
@@ -206,11 +205,8 @@ student.name as name
         </foreach>
     </delete>
     <!--批量修改用户权限-->
-    <update id="updateBanLogin" parameterType="arraylist">
-        UPDATE user set user.banlogin=0 WHERE id in
-        <foreach collection="list" open="(" close=")" separator="," item="id" >
-            #{id}
-        </foreach>
+    <update id="updateBanLogin" parameterType="com.springys.entity.User">
+        UPDATE user set user.banlogin=#{user.banlogin},user.password=#{user.password},user.safeindex=#{user.safeindex},user.email=#{user.email},user.username=#{user.username} WHERE user.id=#{user.id}
     </update>
     <insert id="registUser" parameterType="com.springys.entity.User">
         INSERT INTO user (user.username,user.password,user.email,user.studentid) VALUES (#{user.username},#{user.password},#{user.email},#{user.studentid})

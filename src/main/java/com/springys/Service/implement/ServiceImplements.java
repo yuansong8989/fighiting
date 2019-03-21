@@ -105,11 +105,11 @@ public class ServiceImplements implements Servicemain {
         mainDao.exitDatabase(config, five.getData().getDb_name(), five.getData().getAlias(), five.getData().getCreate_time(), five.getData().getDb_type_id(), five.getData().getDbserver_config_id(), five.getData().getRepository_id(), five.getData().getUpdate_time());
     }
 
-    @Override
-    public void deleteDatabase(int id) {
-        mainDao.deleteDatabase(id);
-    }
 
+//    @Override
+//    public void deleteDatabase(int id) {
+//        mainDao.deleteDatabase(id);
+//    }
     @Override
     public SelectPassword login(String password) {
         return mainDao.login(password);
@@ -528,14 +528,14 @@ public boolean deleteNews(FilePage filePage) {
     }
 
     //批量修改用户登陆权限 可登陆 已禁止
-    public void updateBanLogin(FilePage filePage) {
-        if (filePage.getList1() != null) {
-            List<User> list = filePage.getList1();
-            List<Integer> list1 = new ArrayList<>();
-            for (User user : list) {
-                list1.add(user.getId());
-            }
-            mainDao.updateBanLogin(list1);
+    public void updateBanLogin(User user) {
+        if (user != null) {
+//            List<User> list = filePage.getList1();
+//            List<Integer> list1 = new ArrayList<>();
+//            for (User user : list) {
+//                list1.add(user.getId());
+//            }
+            mainDao.updateBanLogin(user);
         }
     }
 

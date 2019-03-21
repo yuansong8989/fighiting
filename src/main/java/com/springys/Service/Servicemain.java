@@ -15,7 +15,7 @@ public interface Servicemain {
 
     void exitDatabase(String config, Five five);
 
-    void deleteDatabase(int id);
+//    void deleteDatabase(int id);
 
     SelectPassword login(String password);
 
