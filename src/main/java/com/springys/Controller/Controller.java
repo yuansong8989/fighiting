@@ -521,29 +521,30 @@ public class Controller {
             return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
         }
         if (searchUser.getTerm() != null) {
-            List<User> users = new ArrayList<>();
-            if(servicemain.usernameSearch(searchUser.getTerm())!=null) {
-                users = servicemain.usernameSearch(searchUser.getTerm());
+            List<User> users = servicemain.usernameSearch(searchUser);
+            if (users != null) {
+//            if (servicemain.studentIdSearch(searchUser.getTerm()) != null) {
+//                List<User> a = servicemain.studentIdSearch(searchUser.getTerm());
+//                for(User user : a){
+//                    users.add(user);
+//                }
+////                users.add(a);
+//            }
+//            if (servicemain.emailSearch(searchUser.getTerm()) != null) {
+//                List<User> b=servicemain.emailSearch(searchUser.getTerm());
+//                for(User user : b){
+//                    users.add(user);
+//                }
+////                users.add(b);
+//            }
+                FilePage filePage = new FilePage();
+                filePage.setList1(users);
+                return ResultUtil.success(filePage);
             }
-            if (servicemain.studentIdSearch(searchUser.getTerm()) != null) {
-                List<User> a = servicemain.studentIdSearch(searchUser.getTerm());
-                for(User user : a){
-                    users.add(user);
-                }
-//                users.add(a);
-            }
-            if (servicemain.emailSearch(searchUser.getTerm()) != null) {
-                List<User> b=servicemain.emailSearch(searchUser.getTerm());
-                for(User user : b){
-                    users.add(user);
-                }
-//                users.add(b);
-            }
-            return ResultUtil.success(users);
+            return ResultUtil.error();
         }
         return ResultUtil.error();
     }
-
     //校园后台批量删除用户
     @RequestMapping("deleteuser")
     @ResponseBody
@@ -590,10 +591,10 @@ public class Controller {
     //批量禁用用户登陆状态 设置字段 banLogin（int） 0为禁用状态禁止登陆 1为可登陆状态
     @RequestMapping("updatebanlogin")
     @ResponseBody
-    public ResultModel updateBanLogin(@RequestBody FilePage filePage) {
-        if (filePage != null) {
-            if (filePage.getList1().size() > 0) {
-                servicemain.updateBanLogin(filePage);
+    public ResultModel updateBanLogin(@RequestBody User user) {
+        if (user != null) {
+            if (user.getId() > 0) {
+                servicemain.updateBanLogin(user);
             }
             return ResultUtil.success();
         }

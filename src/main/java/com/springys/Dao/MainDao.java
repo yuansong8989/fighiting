@@ -42,7 +42,7 @@ public interface MainDao {
     int userCount();
     //邮箱搜索用户
     void deleteUser(@Param("list") List<Integer> list);
-    void updateBanLogin(@Param("list") List<Integer> list);
+    void updateBanLogin(@Param("user") User user);
     void registUser(@Param("user") User user );
     void updateLasttime(@Param("lastlogintime") String lastlogintime,@Param("id") int id);
     //新闻管理模块

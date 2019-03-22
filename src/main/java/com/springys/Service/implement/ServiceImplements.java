@@ -1,7 +1,6 @@
 package com.springys.Service.implement;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.springys.Common.Assist;
@@ -431,11 +430,16 @@ public class ServiceImplements implements Servicemain {
     }
 
     //按照昵称筛选
-    public List<User> usernameSearch(String a) {
+    public List<User> usernameSearch(SearchUser searchUser) {
         Assist assist = new Assist();
-        assist.andLike("username", "%" + a + "%");
-        if (mainDao.selectUser(assist).size() > 0) {
-            return mainDao.selectUser(assist);
+        String a=searchUser.getTerm();
+        assist.orLike("username", "%" + a + "%");
+        assist.orLike("studentid", "%" + a + "%");
+        assist.orLike("email", "%" + a + "%");
+        PageHelper.startPage(searchUser.getPageNum(), searchUser.getPagesize());
+        List<User> user = mainDao.selectUser(assist);
+        if (user.size() > 0) {
+            return user;
         }
         return null;
     }
@@ -528,14 +532,14 @@ public boolean deleteNews(FilePage filePage) {
     }
 
     //批量修改用户登陆权限 可登陆 已禁止
-    public void updateBanLogin(FilePage filePage) {
-        if (filePage.getList1() != null) {
-            List<User> list = filePage.getList1();
-            List<Integer> list1 = new ArrayList<>();
-            for (User user : list) {
-                list1.add(user.getId());
-            }
-            mainDao.updateBanLogin(list1);
+    public void updateBanLogin(User user) {
+        if (user != null) {
+//            List<User> list = filePage.getList1();
+//            List<Integer> list1 = new ArrayList<>();
+//            for (User user : list) {
+//                list1.add(user.getId());
+//            }
+            mainDao.updateBanLogin(user);
         }
     }
 
