@@ -1,7 +1,6 @@
 package com.springys.Service.implement;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.springys.Common.Assist;
@@ -431,11 +430,16 @@ public class ServiceImplements implements Servicemain {
     }
 
     //按照昵称筛选
-    public List<User> usernameSearch(String a) {
+    public List<User> usernameSearch(SearchUser searchUser) {
         Assist assist = new Assist();
-        assist.andLike("username", "%" + a + "%");
-        if (mainDao.selectUser(assist).size() > 0) {
-            return mainDao.selectUser(assist);
+        String a=searchUser.getTerm();
+        assist.orLike("username", "%" + a + "%");
+        assist.orLike("studentid", "%" + a + "%");
+        assist.orLike("email", "%" + a + "%");
+        PageHelper.startPage(searchUser.getPageNum(), searchUser.getPagesize());
+        List<User> user = mainDao.selectUser(assist);
+        if (user.size() > 0) {
+            return user;
         }
         return null;
     }

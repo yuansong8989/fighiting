@@ -12,5 +12,6 @@ public class SearchUser {
     private  Integer asc;//等级升序
     private int safeindex;//安全指数
     private  int pageNum;
+    private int pagesize;
 
 }
