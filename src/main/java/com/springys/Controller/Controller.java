@@ -4,9 +4,11 @@ import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageInfo;
 import com.springys.Common.*;
 import com.springys.Dao.JpaRepository;
+import com.springys.Dao.MainDao;
 import com.springys.Service.implement.ServiceImplements;
 import com.springys.entity.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -520,8 +522,8 @@ public class Controller {
             return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
         }
         if (searchUser.getTerm() != null) {
-            List<User> users = servicemain.usernameSearch(searchUser);
-            if (users != null) {
+            FilePage filePage = servicemain.usernameSearch(searchUser);
+            if (filePage != null) {
 //            if (servicemain.studentIdSearch(searchUser.getTerm()) != null) {
 //                List<User> a = servicemain.studentIdSearch(searchUser.getTerm());
 //                for(User user : a){
@@ -536,8 +538,6 @@ public class Controller {
 //                }
 ////                users.add(b);
 //            }
-                FilePage filePage = new FilePage();
-                filePage.setList1(users);
                 return ResultUtil.success(filePage);
             }
             return ResultUtil.error();
@@ -565,8 +565,9 @@ public class Controller {
             return ResultUtil.error();
         }
         if (searchUser != null) {
-            if (servicemain.sortgrade(searchUser) != null) {
-                return ResultUtil.success(servicemain.sortgrade(searchUser));
+            FilePage filePage =servicemain.sortgrade(searchUser);
+            if (filePage != null) {
+                return ResultUtil.success(filePage);
             }
         }
         return ResultUtil.error();
@@ -674,5 +675,16 @@ public class Controller {
     //删除新闻 给读者发送消息
     //新闻审核通过 插入 主表新闻 给读者发布消息
 
-
+//excel
+@Autowired
+private MainDao mainDao;
+@GetMapping("/getexcel")
+public void exportTests(HttpServletResponse response) {
+        List list =mainDao.list();
+    try {
+        servicemain.exportTest(list, response);
+    } catch (IOException e) {
+    }
+    System.out.println("ss");
+}
 }

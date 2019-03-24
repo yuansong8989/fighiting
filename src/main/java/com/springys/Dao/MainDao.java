@@ -4,6 +4,7 @@ import com.springys.Common.Assist;
 import com.springys.entity.*;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -54,4 +55,7 @@ public interface MainDao {
     //新闻数量
     int newsCount();
     int deleteNews(@Param("list") List<Integer> list);
+    //excel
+    @Select("select * from user")
+     List<User> list();
 }

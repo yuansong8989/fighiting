@@ -9,9 +9,18 @@ import com.springys.Common.RequestResultEnum;
 import com.springys.Dao.MainDao;
 import com.springys.Service.Servicemain;
 import com.springys.entity.*;
+import com.springys.entity.Picture;
 import com.springys.exception.ComputeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.poi.hssf.usermodel.HSSFCellStyle;
+import org.apache.poi.hssf.usermodel.HSSFFont;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hssf.util.Region;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.quartz.SchedulerException;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
@@ -19,8 +28,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -105,7 +117,7 @@ public class ServiceImplements implements Servicemain {
     }
 
 
-//    @Override
+    //    @Override
 //    public void deleteDatabase(int id) {
 //        mainDao.deleteDatabase(id);
 //    }
@@ -430,18 +442,70 @@ public class ServiceImplements implements Servicemain {
     }
 
     //按照昵称筛选
-    public List<User> usernameSearch(SearchUser searchUser) {
+    public FilePage usernameSearch(SearchUser searchUser) {
         Assist assist = new Assist();
-        String a=searchUser.getTerm();
-        assist.orLike("username", "%" + a + "%");
-        assist.orLike("studentid", "%" + a + "%");
-        assist.orLike("email", "%" + a + "%");
-        PageHelper.startPage(searchUser.getPageNum(), searchUser.getPagesize());
-        List<User> user = mainDao.selectUser(assist);
-        if (user.size() > 0) {
-            return user;
+        if (searchUser.getSafeindex() == null && searchUser.getBanlogin() == null) {
+            String a = searchUser.getTerm();
+            assist.orLike("username", "%" + a + "%");
+            assist.orLike("studentid", "%" + a + "%");
+            assist.orLike("email", "%" + a + "%");
+            List<User> user1 = mainDao.selectUser(assist);
+            int total = user1.size();
+            PageHelper.startPage(searchUser.getPageNum(), searchUser.getPagesize());
+            List<User> user = mainDao.selectUser(assist);
+            FilePage filePage = new FilePage();
+            filePage.setList1(user);
+            filePage.setTotal(total);
+            return filePage;
         }
-        return null;
+        if (searchUser.getSafeindex() != null && searchUser.getBanlogin() == null) {
+            String a = searchUser.getTerm();
+            assist.orLike("username", "%" + a + "%");
+            assist.orLike("studentid", "%" + a + "%");
+            assist.orLike("email", "%" + a + "%");
+            PageHelper.startPage(searchUser.getPageNum(), searchUser.getPagesize());
+            List<User> user1 = mainDao.selectUser(assist);
+            List<User> user2 = user1.stream().filter(b -> b.getSafeindex() == searchUser.getSafeindex()).collect(Collectors.toList());
+            int total = user1.size();
+            List<User> user = mainDao.selectUser(assist);
+            FilePage filePage = new FilePage();
+            filePage.setList1(user2);
+            filePage.setTotal(total);
+            return filePage;
+        }
+        if (searchUser.getSafeindex() == null && searchUser.getBanlogin() != null) {
+            String a = searchUser.getTerm();
+            assist.orLike("username", "%" + a + "%");
+            assist.orLike("studentid", "%" + a + "%");
+            assist.orLike("email", "%" + a + "%");
+            PageHelper.startPage(searchUser.getPageNum(), searchUser.getPagesize());
+            List<User> user1 = mainDao.selectUser(assist);
+            List<User> user2 = user1.stream().filter(b -> b.getBanlogin() == searchUser.getBanlogin()).collect(Collectors.toList());
+            int total = user1.size();
+
+            List<User> user = mainDao.selectUser(assist);
+            FilePage filePage = new FilePage();
+            filePage.setList1(user2);
+            filePage.setTotal(total);
+            return filePage;
+        } else {
+//        Assist assist = new Assist();
+            String a = searchUser.getTerm();
+            assist.orLike("username", "%" + a + "%");
+            assist.orLike("studentid", "%" + a + "%");
+            assist.orLike("email", "%" + a + "%");
+//        assist.andEq("safeindex",searchUser.getSafeindex());
+//        assist.andEq("banlogin",searchUser.getBanlogin());
+            PageHelper.startPage(searchUser.getPageNum(), searchUser.getPagesize());
+            List<User> user1 = mainDao.selectUser(assist);
+            List<User> user2 = user1.stream().filter(b -> b.getBanlogin() == searchUser.getBanlogin() && b.getSafeindex() == searchUser.getSafeindex()).collect(Collectors.toList());
+            int total = user1.size();
+            List<User> user = mainDao.selectUser(assist);
+            FilePage filePage = new FilePage();
+            filePage.setList1(user2);
+            filePage.setTotal(total);
+            return filePage;
+        }
     }
 
     //按照学号搜索筛选
@@ -468,41 +532,51 @@ public class ServiceImplements implements Servicemain {
         }
         return false;
     }
-//批量删除新闻
-public boolean deleteNews(FilePage filePage) {
-    if (filePage != null) {
-        List<News> news = filePage.getNews();
-        List<Integer> list1 = new ArrayList<>();
-        for (News news1 : news) {
-            list1.add(news1.getId());
-        }
-       int a= mainDao.deleteNews(list1);
-        if(a>0){
-            return true;
+
+    //批量删除新闻
+    public boolean deleteNews(FilePage filePage) {
+        if (filePage != null) {
+            List<News> news = filePage.getNews();
+            List<Integer> list1 = new ArrayList<>();
+            for (News news1 : news) {
+                list1.add(news1.getId());
+            }
+            int a = mainDao.deleteNews(list1);
+            if (a > 0) {
+                return true;
+            }
+            return false;
         }
         return false;
     }
-    return false;
-}
+
     //等级升降筛选
-    public List<User> sortgrade(SearchUser searchUser) {
+    public FilePage sortgrade(SearchUser searchUser) {
         Assist assist = new Assist();
         if (searchUser.getAsc() == 1) {
             //返回升序数据
             Assist.WhereOrder whereOrder = new Assist().new WhereOrder("grade", true);
             assist.setOrder(whereOrder);
-            PageHelper.startPage(searchUser.getPageNum(), 20);
+            List<User> list1 = mainDao.selectUser(assist);
+            PageHelper.startPage(searchUser.getPageNum(), 10);
             List<User> list = mainDao.selectUser(assist);
-            return list;
+            FilePage filePage = new FilePage();
+            filePage.setTotal(list1.size());
+            filePage.setList1(list);
+            return filePage;
 
         }
         if (searchUser.getDesc() == 1) {
             //返回降序数据
             Assist.WhereOrder whereOrder = new Assist().new WhereOrder("grade", false);
             assist.setOrder(whereOrder);
-            PageHelper.startPage(searchUser.getPageNum(), 20);
+            List<User> list1 = mainDao.selectUser(assist);
+            PageHelper.startPage(searchUser.getPageNum(), 10);
             List<User> list = mainDao.selectUser(assist);
-            return list;
+            FilePage filePage = new FilePage();
+            filePage.setTotal(list1.size());
+            filePage.setList1(list);
+            return filePage;
         }
         return null;
     }
@@ -545,8 +619,8 @@ public boolean deleteNews(FilePage filePage) {
 
     //校园新闻 后台 新闻板块
     //root 新闻添加
-    public boolean addNews(News news, MultipartFile [] files) throws IOException {
-        Picture picture=new Picture();
+    public boolean addNews(News news, MultipartFile[] files) throws IOException {
+        Picture picture = new Picture();
         for (int i = 0; i < files.length; i++) {
 //                    multipartFile[i].transferTo(new File("path"));
             FileUtils.writeByteArrayToFile(new File("g:/upload/" + files[i].getOriginalFilename()), files[i].getBytes());//字节数组
@@ -554,7 +628,7 @@ public boolean deleteNews(FilePage filePage) {
             //对象转String存入picturepath
             picture.getPicturePaths().add(files[i].getOriginalFilename());
         }
-        String s= JSON.toJSONString(picture);
+        String s = JSON.toJSONString(picture);
         if (news.getMessage() == null) {
             throw new ComputeException(RequestResultEnum.message_EMPTY);
         }
@@ -630,6 +704,107 @@ public boolean deleteNews(FilePage filePage) {
         }
         return list;
     }
+//excel
 
+    //设置样式
+    private HSSFCellStyle getColumnTopStyle(HSSFWorkbook workbook) {
+//        CellStyle cellStyle = workbook.createCellStyle();
+//        CellStyle cellStyle =workbook.createCellStyle();
+//        HSSFWorkbook wb = new HSSFWorkbook();
+//        HSSFWorkbook workbook = new HSSFWorkbook();
+
+        HSSFSheet sheet = workbook.createSheet();
+
+        HSSFCellStyle cellStyle = workbook.createCellStyle();
+//        HSSFSheet sheet = workbook.createSheet();
+//        HSSFCellStyle setBorder = workbook.createCellStyle()
+//        cellStylezzz
+//        HSSFCellStyle cellStyle =
+        cellStyle.setFillForegroundColor((short) 13);// 设置背景色
+        cellStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+        cellStyle.setBorderBottom(HSSFCellStyle.BORDER_THIN); //下边框
+        cellStyle.setBorderLeft(HSSFCellStyle.BORDER_THIN);//左边框
+        cellStyle.setBorderTop(HSSFCellStyle.BORDER_THIN);//上边框
+        cellStyle.setBorderRight(HSSFCellStyle.BORDER_THIN);//右边框
+
+        cellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER); // 居中
+        HSSFFont font = workbook.createFont();
+        font.setFontName("黑体");
+        font.setFontHeightInPoints((short) 16);//设置字体大小
+
+        HSSFFont font2 = workbook.createFont();
+        font2.setFontName("仿宋_GB2312");
+        font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);//粗体显示
+        font2.setFontHeightInPoints((short) 12);
+        sheet.setColumnWidth(0, 3766); //第一个参数代表列id(从0开始),第2个参数代表宽度值
+        cellStyle.setFont(font);//选择需要用到的字体格式
+        sheet.setColumnWidth(0, 3766); //第一个参数代表列id(从0开始),第2个参数代表宽度值
+        cellStyle.setWrapText(true);//设置自动换行
+        Region region1 = new Region(0, (short) 0, 0, (short) 6);
+        sheet.addMergedRegion(region1);
+
+//        cellStyle.setBorderLeft(BorderStyle.THIN);
+//        cellStyle.setBorderRight(BorderStyle.THIN);
+//        cellStyle.setBorderTop(BorderStyle.THIN);
+//        //设置自动换行
+//        cellStyle.setWrapText(false);
+//        cellStyle.setAlignment(HorizontalAlignment.CENTER);
+//        cellStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        return cellStyle;
+    }
+
+    //写入EXCLE
+    public void exportTest(List<User> list, HttpServletResponse response) throws IOException {
+        File file = new File("用户表.xlsx");
+        HSSFWorkbook workbook = new HSSFWorkbook();
+        //设置表的牙样式
+//        HSSFWorkbook workbook = new HSSFWorkbook();
+//
+//        HSSFSheet sheet = workbook.createSheet();
+//
+//        HSSFCellStyle cellStyle = workbook.createCellStyle();
+        HSSFCellStyle cellStyle = getColumnTopStyle(workbook);
+        HSSFSheet sheet = workbook.createSheet();
+        int index = 0;
+        Row row0 = sheet.createRow(index++);
+        //设置第一行
+        row0.createCell(0).setCellValue("序号");
+        row0.createCell(1).setCellValue("昵称");
+        row0.createCell(2).setCellValue("密码");
+        row0.createCell(3).setCellValue("邮箱");
+        row0.createCell(4).setCellValue("等级");
+        row0.createCell(5).setCellValue("学号");
+        row0.createCell(6).setCellValue("加入时间");
+        row0.createCell(7).setCellValue("新闻浏览量");
+        row0.createCell(8).setCellValue("上一次登陆时间");
+        //把查询结果放入到对应的列
+        for (User user : list) {
+            Row row = sheet.createRow(index++);
+            row.createCell(0).setCellValue(user.getId());
+            row.createCell(1).setCellValue(user.getUsername());
+            row.createCell(2).setCellValue(user.getPassword());
+            row.createCell(3).setCellValue(user.getEmail());
+            row.createCell(4).setCellValue(user.getGrade());
+            row.createCell(5).setCellValue(user.getStudentid());
+            row.createCell(6).setCellValue(user.getCreatetime());
+            row.createCell(7).setCellValue(user.getSeenum());
+            row.createCell(8).setCellValue(user.getLastlogintime());
+        }
+
+        for (int m = 0; m <= sheet.getLastRowNum(); m++) {
+            Row rowStyle = sheet.getRow(m);
+            for (int n = 0; n < rowStyle.getLastCellNum(); n++) {
+                rowStyle.getCell(n).setCellStyle(cellStyle);
+            }
+        }
+        response.reset();
+        response.setHeader("Content-Disposition", "attachment;filename=\"" + new String(file.getName().getBytes("utf-8"), "ISO8859-1") + "\"");
+        response.setContentType("application/octet-stream;charset=UTF-8");
+        OutputStream os = new BufferedOutputStream(response.getOutputStream());
+        workbook.write(os);
+        os.flush();
+        os.close();
+        workbook.close();
+    }
 }
 

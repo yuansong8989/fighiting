@@ -10,7 +10,8 @@ public class SearchUser {
     private  String term;
     private Integer desc;//等级降序
     private  Integer asc;//等级升序
-    private int safeindex;//安全指数
+    private Integer safeindex;//安全指数
+    private Integer banlogin;//登陆权限
     private  int pageNum;
     private int pagesize;
 
