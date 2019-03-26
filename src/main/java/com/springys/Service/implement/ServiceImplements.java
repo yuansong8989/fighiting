@@ -6,10 +6,10 @@ import com.github.pagehelper.PageInfo;
 import com.springys.Common.Assist;
 import com.springys.Common.QuartzManager;
 import com.springys.Common.RequestResultEnum;
+import com.springys.Common.ResultToken;
 import com.springys.Dao.MainDao;
 import com.springys.Service.Servicemain;
 import com.springys.entity.*;
-import com.springys.entity.Picture;
 import com.springys.exception.ComputeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
@@ -18,9 +18,7 @@ import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.Region;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
 import org.quartz.SchedulerException;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
@@ -222,11 +220,11 @@ public class ServiceImplements implements Servicemain {
     public boolean selectUser(User user) {
 
         Assist assist = new Assist();
-        assist.andEq("studentid", user.getStudentid());
+        assist.andEq("username", user.getUsername());
         assist.andEq("password", user.getPassword());
         User user1 = mainDao.selectUser(assist).get(0);
         if (user1 != null) {
-            if (user1.getStudentid().equals(user.getStudentid()) && user1.getPassword().equals(user.getPassword())) {
+            if (user1.getUsername().equals(user.getUsername()) && user1.getPassword().equals(user.getPassword())) {
                 if (user1.getBanlogin() == 0) {
                     throw new ComputeException(RequestResultEnum.login_ban);
                 }
@@ -238,6 +236,22 @@ public class ServiceImplements implements Servicemain {
             return false;
         }
         return false;
+    }
+
+    //通过token设置
+    public ResultToken resultToken(Token token) {
+        ResultToken resultToken = new ResultToken();
+        resultToken.setName(token.getUsername());
+        Assist assist = new Assist();
+        assist.andLike("username", token.getUsername());
+        assist.andLike("password", token.getPassword());
+        List<User> user = mainDao.selectUser(assist);
+        String role = user.get(0).getRole();
+        String roles[] = new String[]{role};
+        resultToken.setRoles(roles);
+        resultToken.setAvatar("用户");
+        resultToken.setIntroduction("http://10.10.1.88");
+        return resultToken;
     }
 
     //校园发布系统用户注册

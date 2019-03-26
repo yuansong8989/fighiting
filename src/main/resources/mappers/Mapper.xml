@@ -140,7 +140,8 @@ student.name as name
         user.discussnum as discussnum,
         user.seenum as seenum,
         user.createtime as createtime,
-        user.lastlogintime as lastlogintime
+        user.lastlogintime as lastlogintime,
+        user.role as role
     </sql>
     <resultMap id="result_user" type="com.springys.entity.User">
         <id column="id" property="id"/>
@@ -156,6 +157,7 @@ student.name as name
         <result property="newsnum" column="newsnum"/>
         <result property="seenum" column="seenum"/>
         <result property="discussnum" column="discussnum"/>
+        <result property="role" column="role"/>
     </resultMap>
     <select id="selectUser" parameterType="com.springys.Common.Assist"  resultMap="result_user">
         select  <if test="distinct !=null">${distinct}</if>

@@ -20,4 +20,5 @@ public class User {
     private int seenum;//浏览新闻数量
     private String  lastlogintime;//上一次登陆时间
     private String  createtime;//加入系统时间
+    private String role;
 }

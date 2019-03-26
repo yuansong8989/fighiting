@@ -8,7 +8,6 @@ import com.springys.Dao.MainDao;
 import com.springys.Service.implement.ServiceImplements;
 import com.springys.entity.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +55,7 @@ public class Controller {
             return ResultMain.success(MessageCode.success, ruseltData);
         }
     }
+
     @RequestMapping("exitDatabase")
     public Uniti exitDatabase(@RequestBody Five five) {
         if (five.getData() == null) {
@@ -477,12 +477,25 @@ public class Controller {
     @RequestMapping("loginmanger")
     @ResponseBody
     public ResultModel loginManager(@RequestBody User user) {
-        if (user.getStudentid() == null || user.getPassword() == null) {
+        if (user.getUsername() == null || user.getPassword() == null) {
             return ResultUtil.error();
         }
         if (servicemain.selectUser(user)) {
-            return ResultUtil.success();
+            Token token = new Token();
+            token.setToken(MD5Utils.md5password());
+            return ResultUtil.success(token);
         } else return ResultUtil.error(RequestResultEnum.login_auth_error);
+    }
+
+    //token验证 并且存取账户信息
+    @RequestMapping("getUserInfo")
+    @ResponseBody
+    public ResultModel getUserInfo(@RequestBody Token token) {
+        if (MD5Utils.md5password().equals(token.getToken())) {
+            ResultToken resultToken = servicemain.resultToken(token);
+            return ResultUtil.success(resultToken);
+        }
+        return ResultUtil.error();
     }
 
     //校园发布系统用户注册
@@ -499,7 +512,7 @@ public class Controller {
         return ResultUtil.success();
     }
 
-//后台管理-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+    //后台管理-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //校园新闻后台管理系统-用户管理模块
     //分页查询
     @RequestMapping("pageuser")
@@ -544,6 +557,7 @@ public class Controller {
         }
         return ResultUtil.error();
     }
+
     //校园后台批量删除用户
     @RequestMapping("deleteuser")
     @ResponseBody
@@ -565,7 +579,7 @@ public class Controller {
             return ResultUtil.error();
         }
         if (searchUser != null) {
-            FilePage filePage =servicemain.sortgrade(searchUser);
+            FilePage filePage = servicemain.sortgrade(searchUser);
             if (filePage != null) {
                 return ResultUtil.success(filePage);
             }
@@ -600,18 +614,19 @@ public class Controller {
         }
         return ResultUtil.error();
     }
+
     //校园新闻后台管理系统-新闻管理模块
     //新闻添加(管理员添加和 用户添加) 都添加至表allnews
     //管理员添加
     @RequestMapping("newsAdd")
     @ResponseBody
-    public ResultModel newsAdd(@RequestBody News news,@RequestParam("file") MultipartFile[] files){
-        if(news!=null){
-            try{
-                if(servicemain.addNews(news,files)){
+    public ResultModel newsAdd(@RequestBody News news, @RequestParam("file") MultipartFile[] files) {
+        if (news != null) {
+            try {
+                if (servicemain.addNews(news, files)) {
                     return ResultUtil.success();
                 }
-            }catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
             return ResultUtil.error();
@@ -623,19 +638,20 @@ public class Controller {
     //用户添加新闻
     @RequestMapping("usernewsAdd")
     @ResponseBody
-    public ResultModel userNewsAdd(@RequestBody News news){
-        if(news!=null){
-            if(servicemain.userAddNews(news)){
+    public ResultModel userNewsAdd(@RequestBody News news) {
+        if (news != null) {
+            if (servicemain.userAddNews(news)) {
                 return ResultUtil.success();
             }
             return ResultUtil.error();
         }
         return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
     }
-//新闻分页显示全部
+
+    //新闻分页显示全部
     @RequestMapping("pagenews")
     @ResponseBody
-    public ResultModel pageNews(@RequestBody PageParameter pageParameter){
+    public ResultModel pageNews(@RequestBody PageParameter pageParameter) {
         if (pageParameter.getPageNum() == 0 || pageParameter.getPagesize() == 0) {
             ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
         } else {
@@ -644,17 +660,19 @@ public class Controller {
         }
         return ResultUtil.error(RequestResultEnum.EDIT_FAIL);
     }
+
     //新闻筛选 按照 作者 和分类
     @RequestMapping("findnews")
     @ResponseBody
-    public ResultModel findNews(@RequestBody News news){
+    public ResultModel findNews(@RequestBody News news) {
         //根据传入条件查找
         return ResultUtil.success(servicemain.findNews(news));
     }
+
     //新闻批量删除
     @RequestMapping("deletenews")
     @ResponseBody
-    public ResultModel deleteNews(@RequestBody FilePage filePage){
+    public ResultModel deleteNews(@RequestBody FilePage filePage) {
         if (filePage == null) {
             return ResultUtil.error(RequestResultEnum.DELETE_FAIL);
         }
@@ -675,16 +693,17 @@ public class Controller {
     //删除新闻 给读者发送消息
     //新闻审核通过 插入 主表新闻 给读者发布消息
 
-//excel
-@Autowired
-private MainDao mainDao;
-@GetMapping("/getexcel")
-public void exportTests(HttpServletResponse response) {
-        List list =mainDao.list();
-    try {
-        servicemain.exportTest(list, response);
-    } catch (IOException e) {
+    //excel
+    @Autowired
+    private MainDao mainDao;
+
+    @GetMapping("/getexcel")
+    public void exportTests(HttpServletResponse response) {
+        List list = mainDao.list();
+        try {
+            servicemain.exportTest(list, response);
+        } catch (IOException e) {
+        }
+        System.out.println("ss");
     }
-    System.out.println("ss");
-}
 }
