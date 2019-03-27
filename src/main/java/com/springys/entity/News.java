@@ -19,4 +19,9 @@ public class News {
     private int discussnum;//讨论数量
     private  int classifybelong;//属于新闻类别
     private  String title;//新闻标题
+    private  Integer adviseindex;//消息指数
+    private  Integer status;//状态
+    private  String content_short;//文章摘要
+    private String userstudentid;//user学号
+
 }

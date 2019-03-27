@@ -3,9 +3,7 @@ package com.springys.Service.implement;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.springys.Common.Assist;
-import com.springys.Common.QuartzManager;
-import com.springys.Common.RequestResultEnum;
+import com.springys.Common.*;
 import com.springys.Dao.MainDao;
 import com.springys.Service.Servicemain;
 import com.springys.entity.*;
@@ -216,17 +214,31 @@ public class ServiceImplements implements Servicemain {
             e.printStackTrace();
         }
     }
-
+//token判断
+    public TokenResult addUserinfo(Token token){
+        TokenResult result=new TokenResult();
+        result.setName(token.getUsername());
+        Assist assist=new Assist();
+        assist.andEq("username",token.getUsername());
+        assist.andEq("password",token.getPassword());
+        List<User> users =mainDao.selectUser(assist);
+        String role=users.get(0).getRole();
+        String roles[]=new String []{role};
+        result.setRoles(roles);
+        result.setIntroduction("http://10.10.8.88");
+        result.setAvatar(users.get(0).getStudentid());
+        return result;
+    }
     //    校园发布管理系统登陆
     @Override
     public boolean selectUser(User user) {
 
         Assist assist = new Assist();
-        assist.andEq("studentid", user.getStudentid());
+        assist.andEq("username", user.getUsername());
         assist.andEq("password", user.getPassword());
         User user1 = mainDao.selectUser(assist).get(0);
         if (user1 != null) {
-            if (user1.getStudentid().equals(user.getStudentid()) && user1.getPassword().equals(user.getPassword())) {
+            if (user1.getUsername().equals(user.getUsername()) && user1.getPassword().equals(user.getPassword())) {
                 if (user1.getBanlogin() == 0) {
                     throw new ComputeException(RequestResultEnum.login_ban);
                 }
@@ -619,16 +631,16 @@ public class ServiceImplements implements Servicemain {
 
     //校园新闻 后台 新闻板块
     //root 新闻添加
-    public boolean addNews(News news, MultipartFile[] files) throws IOException {
-        Picture picture = new Picture();
-        for (int i = 0; i < files.length; i++) {
-//                    multipartFile[i].transferTo(new File("path"));
-            FileUtils.writeByteArrayToFile(new File("g:/upload/" + files[i].getOriginalFilename()), files[i].getBytes());//字节数组
-//           this.InsertFileName(files[i].getOriginalFilename());
-            //对象转String存入picturepath
-            picture.getPicturePaths().add(files[i].getOriginalFilename());
-        }
-        String s = JSON.toJSONString(picture);
+    public boolean addNews(News news) {
+//        Picture picture = new Picture();
+//        for (int i = 0; i < files.length; i++) {
+////                    multipartFile[i].transferTo(new File("path"));
+//            FileUtils.writeByteArrayToFile(new File("g:/upload/" + files[i].getOriginalFilename()), files[i].getBytes());//字节数组
+////           this.InsertFileName(files[i].getOriginalFilename());
+//            //对象转String存入picturepath
+//            picture.getPicturePaths().add(files[i].getOriginalFilename());
+//        }
+//        String s = JSON.toJSONString(picture);
         if (news.getMessage() == null) {
             throw new ComputeException(RequestResultEnum.message_EMPTY);
         }
@@ -636,8 +648,15 @@ public class ServiceImplements implements Servicemain {
             throw new ComputeException(RequestResultEnum.title_EMPTY);
         }
         news.setBelong(1);
-        news.setAuthor("管理员");
-        news.setPicturepath(s);
+        news.setAuthor("用户");
+        news.setUserstudentid(news.getUserstudentid());
+        news.setStatus(0);
+//        str=str.Replace("abc","ABC");
+        String s =news.getMessage();
+     String  b = s.substring(0,s.length() - 4);
+     String c = b.substring(3,b.length());
+     news.setMessage(c);
+//        news.setPicturepath(s);
         if (mainDao.insertNews(news) > 0) {
             return true;
         }

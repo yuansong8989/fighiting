@@ -280,7 +280,7 @@ student.name as name
     </select>
     <!--增加新闻-->
     <insert id="insertNews" parameterType="com.springys.entity.News">
-        INSERT  INTO allnews (allnews.message,allnews.picturepath,allnews.vediopath,allnews.belong,allnews.author,allnews.title,allnews.classifybelong) VALUES (#{news.message},#{news.picturepath},#{news.vediopath},#{news.belong},#{news.author},#{news.title},#{news.classifybelong})
+        INSERT  INTO allnews (allnews.message,allnews.picturepath,allnews.vediopath,allnews.belong,allnews.author,allnews.title,allnews.classifybelong,allnews.adviseindex,allnews.content_short,allnews.status,allnews.userstudentid) VALUES (#{news.message},#{news.picturepath},#{news.vediopath},#{news.belong},#{news.author},#{news.title},#{news.classifybelong},#{news.adviseindex},#{news.content_short},#{news.status},#{news.userstudentid})
     </insert>
     <!--增加用户新闻发布数量-->
     <update id="updateNewsnum" >

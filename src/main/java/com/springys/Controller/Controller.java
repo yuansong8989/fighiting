@@ -477,14 +477,24 @@ public class Controller {
     @RequestMapping("loginmanger")
     @ResponseBody
     public ResultModel loginManager(@RequestBody User user) {
-        if (user.getStudentid() == null || user.getPassword() == null) {
+        if (user.getUsername() == null || user.getPassword() == null) {
             return ResultUtil.error();
         }
         if (servicemain.selectUser(user)) {
-            return ResultUtil.success();
+            Token token =new Token();
+            token.setToken(MD5Utils.md5password());
+            return ResultUtil.success(token);
         } else return ResultUtil.error(RequestResultEnum.login_auth_error);
     }
-
+@RequestMapping("gettoken")
+@ResponseBody
+public ResultModel getToken(@RequestBody Token token){
+        if(token.getToken().equals(MD5Utils.md5password())){
+//            servicemain.addUserinfo(token);
+            return ResultUtil.success(servicemain.addUserinfo(token));
+        }
+        return ResultUtil.error();
+}
     //校园发布系统用户注册
     @RequestMapping("registuser")
     @ResponseBody
@@ -605,15 +615,11 @@ public class Controller {
     //管理员添加
     @RequestMapping("newsAdd")
     @ResponseBody
-    public ResultModel newsAdd(@RequestBody News news,@RequestParam("file") MultipartFile[] files){
+    public ResultModel newsAdd(@RequestBody News news){
         if(news!=null){
-            try{
-                if(servicemain.addNews(news,files)){
+                if(servicemain.addNews(news)) {
                     return ResultUtil.success();
                 }
-            }catch (IOException e){
-                e.printStackTrace();
-            }
             return ResultUtil.error();
         }
         return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
