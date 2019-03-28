@@ -23,7 +23,7 @@ public class RequestObject {
         private int fileid[];
         private String mohuName;
         private int classfiyid;//脚本分类id
-        private List<classIfy> list;//脚本分类name
+        private List<Classify> list;//脚本分类name
         private int fileuid;//文件分类uid
         private int fileid1;
     }

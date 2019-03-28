@@ -30,7 +30,7 @@ public interface MainDao {
 
    void InsertFileName(@Param("filename") String filename);
    List<Students> classifySelect(@Param("classify") int classify);
-   void addClassify(@Param("classList") List<classIfy> classList);
+   void addClassify(@Param("classList") List<Classify> classList);
    void fileClassify(@Param("fileuid") int fileuid,@Param("fileid1") int fileid1);
    int selectCount(@Param("id") int id);
    void updatetime(@Param("name") String name,@Param("id") int id);
@@ -58,4 +58,5 @@ public interface MainDao {
     //excel
     @Select("select * from user")
      List<User> list();
+    List<Classify> selectClassify();
 }

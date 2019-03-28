@@ -23,5 +23,6 @@ public class News {
     private  Integer status;//状态
     private  String content_short;//文章摘要
     private String userstudentid;//user学号
+    private int looknum;//访问量
 
 }

@@ -6,8 +6,7 @@ import lombok.Data;
  * Created by yzd on 2019/2/21.
  */
 @Data
-public class classIfy {
+public class Classify {
     private String classifyname;
-    private int classifyid;
-    private int classifyuid;
+    private int id;
 }

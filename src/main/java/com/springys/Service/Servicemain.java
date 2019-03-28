@@ -33,7 +33,7 @@ public interface Servicemain {
 
     List<Students> classifySelect(int classsifyid);
 
-    void addClassify(List<classIfy> list);
+    void addClassify(List<Classify> list);
 
     void fileClassify(int fileuid, int fileid1);
 
