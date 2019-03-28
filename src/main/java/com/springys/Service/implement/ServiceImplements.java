@@ -1,29 +1,26 @@
 package com.springys.Service.implement;
 
-import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.springys.Common.*;
+import com.springys.Common.Assist;
+import com.springys.Common.QuartzManager;
+import com.springys.Common.RequestResultEnum;
+import com.springys.Common.TokenResult;
 import com.springys.Dao.MainDao;
 import com.springys.Service.Servicemain;
 import com.springys.entity.*;
-import com.springys.entity.Picture;
 import com.springys.exception.ComputeException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.hssf.util.Region;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
 import org.quartz.SchedulerException;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -175,7 +172,7 @@ public class ServiceImplements implements Servicemain {
     }
 
     @Override
-    public void addClassify(List<classIfy> list) {
+    public void addClassify(List<Classify> list) {
         mainDao.addClassify(list);
     }
 
@@ -214,21 +211,23 @@ public class ServiceImplements implements Servicemain {
             e.printStackTrace();
         }
     }
-//token判断
-    public TokenResult addUserinfo(Token token){
-        TokenResult result=new TokenResult();
+
+    //token判断
+    public TokenResult addUserinfo(Token token) {
+        TokenResult result = new TokenResult();
         result.setName(token.getUsername());
-        Assist assist=new Assist();
-        assist.andEq("username",token.getUsername());
-        assist.andEq("password",token.getPassword());
-        List<User> users =mainDao.selectUser(assist);
-        String role=users.get(0).getRole();
-        String roles[]=new String []{role};
+        Assist assist = new Assist();
+        assist.andEq("username", token.getUsername());
+        assist.andEq("password", token.getPassword());
+        List<User> users = mainDao.selectUser(assist);
+        String role = users.get(0).getRole();
+        String roles[] = new String[]{role};
         result.setRoles(roles);
-        result.setIntroduction("http://10.10.8.88");
+        result.setIntroduction("http://10.10.8.88");//头像图片地址
         result.setAvatar(users.get(0).getStudentid());
         return result;
     }
+
     //    校园发布管理系统登陆
     @Override
     public boolean selectUser(User user) {
@@ -647,15 +646,20 @@ public class ServiceImplements implements Servicemain {
         if (news.getTitle() == null) {
             throw new ComputeException(RequestResultEnum.title_EMPTY);
         }
+        Assist assist = new Assist();
+        assist.andEq("studentid", news.getUserstudentid());
+        List<User> users = mainDao.selectUser(assist);
+        String author = users.get(0).getUsername();
         news.setBelong(1);
-        news.setAuthor("用户");
+        news.setAuthor(author);
         news.setUserstudentid(news.getUserstudentid());
         news.setStatus(0);
 //        str=str.Replace("abc","ABC");
-        String s =news.getMessage();
-     String  b = s.substring(0,s.length() - 4);
-     String c = b.substring(3,b.length());
-     news.setMessage(c);
+        String s = news.getMessage();
+        String b = s.substring(0, s.length() - 4);
+        String c = b.substring(3, b.length());
+        news.setMessage(c);
+        news.setLooknum(0);
 //        news.setPicturepath(s);
         if (mainDao.insertNews(news) > 0) {
             return true;
@@ -684,7 +688,27 @@ public class ServiceImplements implements Servicemain {
 //        mainDao.insertNews(news);
         return false;
     }
+//获取今日头条5条
+    public List<News> getNewsClassify(){
+        Assist assist =new Assist();
+        assist.andEq("classifybelong",1);
+        List<News> list =mainDao.selectNews(assist);
+        List<News> listEnd=new ArrayList<>();
 
+        listEnd.add(list.get(list.size()-1));
+        listEnd.add(list.get(list.size()-2));
+        listEnd.add(list.get(list.size()-3));
+        listEnd.add(list.get(list.size()-4));
+        listEnd.add(list.get(list.size()-5));
+        return listEnd;
+
+
+    }
+    //获取全部分类
+    public List<Classify> getClassify(){
+List<Classify> list=mainDao.selectClassify();
+return list;
+    }
     //新闻筛选查询 传入 标题 以及分类 以及作者
     public List<News> findNews(News news) {
         List<News> list = new ArrayList<>();

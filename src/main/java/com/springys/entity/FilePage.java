@@ -11,6 +11,8 @@ import java.util.List;
 public class FilePage {
     private int total;//查出的文件/用户总数/新闻总数
     private List<String>list;
-    private List<User> list1;
-    private List<News> news;
+    private List<User> list1;//user
+    private List<News> news;//news
+    private List<Classify> classify;
+
 }

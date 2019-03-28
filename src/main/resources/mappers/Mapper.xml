@@ -218,18 +218,23 @@ student.name as name
     </update>
     <!--新闻模块-->
     <sql id="News">
-        news.id as id,
-        news.message as message,
-        news.picturepath as picturepath,
-        news.vediopath as vediopath,
-        news.createtime as createtime,
-        news.updatetime as updatetime,
-        news.belong as belong,
-        news.agreenum as agreenum,
-        news.author as author,
-        news.discussnum as discussnum,
-        news.classifybelong as classifybelong,
-        news.title as title
+        allnews.id as id,
+        allnews.message as message,
+        allnews.picturepath as picturepath,
+        allnews.vediopath as vediopath,
+        allnews.createtime as createtime,
+        allnews.updatetime as updatetime,
+        allnews.belong as belong,
+        allnews.agreenum as agreenum,
+        allnews.author as author,
+        allnews.discussnum as discussnum,
+        allnews.classifybelong as classifybelong,
+        allnews.title as title,
+        allnews.status as status,
+        allnews.userstudentid as userstudentid,
+        allnews.content_short as content_short,
+        allnews.adviseindex as adviseindex,
+        allnews.looknum as looknum
     </sql>
     <resultMap id="result_news" type="com.springys.entity.News">
         <id column="id" property="id"/>
@@ -244,6 +249,11 @@ student.name as name
         <result property="updatetime" column="updatetime"/>
         <result property="title" column="title"/>
         <result property="classifybelong" column="classifybelong"/>
+        <result property="status" column="status"/>
+        <result property="userstudentid" column="userstudentid"/>
+        <result property="content_short" column="content_short"/>
+        <result property="adviseindex" column="adviseindex"/>
+        <result property="looknum" column="looknum"/>
     </resultMap>
     <select id="selectNews" parameterType="com.springys.Common.Assist"  resultMap="result_news">
         select  <if test="distinct !=null">${distinct}</if>
@@ -280,7 +290,7 @@ student.name as name
     </select>
     <!--增加新闻-->
     <insert id="insertNews" parameterType="com.springys.entity.News">
-        INSERT  INTO allnews (allnews.message,allnews.picturepath,allnews.vediopath,allnews.belong,allnews.author,allnews.title,allnews.classifybelong,allnews.adviseindex,allnews.content_short,allnews.status,allnews.userstudentid) VALUES (#{news.message},#{news.picturepath},#{news.vediopath},#{news.belong},#{news.author},#{news.title},#{news.classifybelong},#{news.adviseindex},#{news.content_short},#{news.status},#{news.userstudentid})
+        INSERT  INTO allnews (allnews.message,allnews.picturepath,allnews.vediopath,allnews.belong,allnews.author,allnews.title,allnews.classifybelong,allnews.adviseindex,allnews.content_short,allnews.status,allnews.userstudentid,allnews.looknum) VALUES (#{news.message},#{news.picturepath},#{news.vediopath},#{news.belong},#{news.author},#{news.title},#{news.classifybelong},#{news.adviseindex},#{news.content_short},#{news.status},#{news.userstudentid},#{news.looknum})
     </insert>
     <!--增加用户新闻发布数量-->
     <update id="updateNewsnum" >
@@ -292,4 +302,7 @@ student.name as name
             #{id}
         </foreach>
     </delete>
+    <select id="selectClassify" resultType="com.springys.entity.Classify">
+        select * FROM  newsclassify
+    </select>
 </mapper>

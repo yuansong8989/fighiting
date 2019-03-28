@@ -8,7 +8,6 @@ import com.springys.Dao.MainDao;
 import com.springys.Service.implement.ServiceImplements;
 import com.springys.entity.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.mapper.Mapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -425,7 +424,7 @@ public class Controller {
     @RequestMapping("addclassify")
     @ResponseBody
     public Uniti addClassify(@RequestBody RequestObject requestObject) {
-        List<classIfy> list = requestObject.getData().getList();//传入的新增分类名称
+        List<Classify> list = requestObject.getData().getList();//传入的新增分类名称
         servicemain.addClassify(list);//插入成功
         //设置uid相等于id
 
@@ -638,6 +637,16 @@ public ResultModel getToken(@RequestBody Token token){
         }
         return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
     }
+    //获取新闻分类
+    @RequestMapping("getclassify")
+    @ResponseBody
+    public ResultModel getNewsClassify(){
+        FilePage filePage =new FilePage();
+        filePage.setClassify(servicemain.getClassify());
+        return ResultUtil.success(filePage);
+    }
+    //获取新闻今日头条最新五条
+
 //新闻分页显示全部
     @RequestMapping("pagenews")
     @ResponseBody
