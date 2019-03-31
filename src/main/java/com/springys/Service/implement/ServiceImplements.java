@@ -688,13 +688,29 @@ public class ServiceImplements implements Servicemain {
 //        mainDao.insertNews(news);
         return false;
     }
-//获取今日头条5条
-    public List<News> getNewsClassify(){
+//获取娱乐5条
+    public List<News> getHappyNews(int i){
         Assist assist =new Assist();
-        assist.andEq("classifybelong",1);
+        if(i==2){
+            assist.andEq("classifybelong",2);
+        }
+        if(i==1){
+            assist.andEq("classifybelong",1);
+        }
+        if(i==3){
+            assist.andEq("classifybelong",3);
+        }
+        if(i==4){
+            assist.andEq("classifybelong",4);
+        }
+        if(i==5){
+            assist.andEq("classifybelong",5);
+        }
+        if(i==6){
+            assist.andEq("classifybelong",6);
+        }
         List<News> list =mainDao.selectNews(assist);
         List<News> listEnd=new ArrayList<>();
-
         listEnd.add(list.get(list.size()-1));
         listEnd.add(list.get(list.size()-2));
         listEnd.add(list.get(list.size()-3));

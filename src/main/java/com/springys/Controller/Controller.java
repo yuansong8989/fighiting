@@ -645,8 +645,54 @@ public ResultModel getToken(@RequestBody Token token){
         filePage.setClassify(servicemain.getClassify());
         return ResultUtil.success(filePage);
     }
-    //获取新闻今日头条最新五条
-
+    //获取娱乐新闻
+    @RequestMapping("gethappynews")
+    @ResponseBody
+    public  ResultModel getHappyNews(){
+        FilePage filePage =new FilePage();
+        filePage.setNews(servicemain.getHappyNews(2));
+        return ResultUtil.success(filePage);
+    }
+    //今日头条
+    @RequestMapping("getheadnews")
+    @ResponseBody
+    public  ResultModel getHeadNews(){
+        FilePage filePage =new FilePage();
+        filePage.setNews(servicemain.getHappyNews(1));
+        return ResultUtil.success(filePage);
+    }
+    //体育
+    @RequestMapping("getsportsnews")
+    @ResponseBody
+    public  ResultModel getSportsNews(){
+        FilePage filePage =new FilePage();
+        filePage.setNews(servicemain.getHappyNews(3));
+        return ResultUtil.success(filePage);
+    }
+    //游戏
+    @RequestMapping("getgamenews")
+    @ResponseBody
+    public  ResultModel getGameNews(){
+        FilePage filePage =new FilePage();
+        filePage.setNews(servicemain.getHappyNews(4));
+        return ResultUtil.success(filePage);
+    }
+    //学校
+    @RequestMapping("getschoolnews")
+    @ResponseBody
+    public  ResultModel getSchoolNews(){
+        FilePage filePage =new FilePage();
+        filePage.setNews(servicemain.getHappyNews(5));
+        return ResultUtil.success(filePage);
+    }
+    //校园公示栏
+    @RequestMapping("getschoolcommon")
+    @ResponseBody
+    public  ResultModel getSchoolCommon(){
+        FilePage filePage =new FilePage();
+        filePage.setNews(servicemain.getHappyNews(6));
+        return ResultUtil.success(filePage);
+    }
 //新闻分页显示全部
     @RequestMapping("pagenews")
     @ResponseBody
