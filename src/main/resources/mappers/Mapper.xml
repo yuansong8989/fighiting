@@ -309,4 +309,14 @@ student.name as name
     <insert id="insertHead">
         INSERT INTO allnews (picturepath) VALUES (#{path}) where id= 4
     </insert>
+    <update id="updateNewsJson">
+        update  allnews set allnews.userjson=#{userjson}, allnews.agreenum=allnews.agreenum+1  where allnews.id=#{id}
+    </update>
+    <update id="updateFollowUser">
+        update  user set user.byfollowjson=#{a}  where user.id=#{id}
+    </update>
+    <update id="updateByFollowUser">
+        update  user set user.authorjson=#{a}  where user.id=#{id}
+    </update>
+
 </mapper>

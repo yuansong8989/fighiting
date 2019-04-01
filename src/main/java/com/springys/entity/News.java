@@ -24,5 +24,6 @@ public class News {
     private  String content_short;//文章摘要
     private String userstudentid;//user学号
     private int looknum;//访问量
+    private String userjson;//存放用户点赞json
 
 }

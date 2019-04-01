@@ -21,4 +21,6 @@ public class User {
     private String  lastlogintime;//上一次登陆时间
     private String  createtime;//加入系统时间
     private String role;
+    private String authorjson;//自己关注
+    private String byfollowjson;//被关注
 }

@@ -1,5 +1,6 @@
 package com.springys.Service.implement;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.springys.Common.Assist;
@@ -165,9 +166,11 @@ public class ServiceImplements implements Servicemain {
     public void InsertFileName(String fileName) {
         mainDao.InsertFileName(fileName);
     }
+
     public void InsertHead(String fileName) {
         mainDao.insertHead(fileName);
     }
+
     @Override
     public List<Students> classifySelect(int classsifyid) {
         return mainDao.classifySelect(classsifyid);
@@ -225,7 +228,7 @@ public class ServiceImplements implements Servicemain {
         String role = users.get(0).getRole();
         String roles[] = new String[]{role};
         result.setRoles(roles);
-        result.setIntroduction("http://10.10.8.88");//头像图片地址
+        result.setIntroduction("../../../static/images/e.jpg");//头像图片地址
         result.setAvatar(users.get(0).getStudentid());
         return result;
     }
@@ -690,43 +693,46 @@ public class ServiceImplements implements Servicemain {
 //        mainDao.insertNews(news);
         return false;
     }
-//获取娱乐5条
-    public List<News> getHappyNews(int i){
-        Assist assist =new Assist();
-        if(i==2){
-            assist.andEq("classifybelong",2);
+
+    //获取娱乐5条
+    public List<News> getHappyNews(int i) {
+        Assist assist = new Assist();
+        if (i == 2) {
+            assist.andEq("classifybelong", 2);
         }
-        if(i==1){
-            assist.andEq("classifybelong",1);
+        if (i == 1) {
+            assist.andEq("classifybelong", 1);
         }
-        if(i==3){
-            assist.andEq("classifybelong",3);
+        if (i == 3) {
+            assist.andEq("classifybelong", 3);
         }
-        if(i==4){
-            assist.andEq("classifybelong",4);
+        if (i == 4) {
+            assist.andEq("classifybelong", 4);
         }
-        if(i==5){
-            assist.andEq("classifybelong",5);
+        if (i == 5) {
+            assist.andEq("classifybelong", 5);
         }
-        if(i==6){
-            assist.andEq("classifybelong",6);
+        if (i == 6) {
+            assist.andEq("classifybelong", 6);
         }
-        List<News> list =mainDao.selectNews(assist);
-        List<News> listEnd=new ArrayList<>();
-        listEnd.add(list.get(list.size()-1));
-        listEnd.add(list.get(list.size()-2));
-        listEnd.add(list.get(list.size()-3));
-        listEnd.add(list.get(list.size()-4));
-        listEnd.add(list.get(list.size()-5));
+        List<News> list = mainDao.selectNews(assist);
+        List<News> listEnd = new ArrayList<>();
+        listEnd.add(list.get(list.size() - 1));
+        listEnd.add(list.get(list.size() - 2));
+        listEnd.add(list.get(list.size() - 3));
+        listEnd.add(list.get(list.size() - 4));
+        listEnd.add(list.get(list.size() - 5));
         return listEnd;
 
 
     }
+
     //获取全部分类
-    public List<Classify> getClassify(){
-List<Classify> list=mainDao.selectClassify();
-return list;
+    public List<Classify> getClassify() {
+        List<Classify> list = mainDao.selectClassify();
+        return list;
     }
+
     //新闻筛选查询 传入 标题 以及分类 以及作者
     public List<News> findNews(News news) {
         List<News> list = new ArrayList<>();
@@ -866,6 +872,110 @@ return list;
         os.flush();
         os.close();
         workbook.close();
+    }
+
+    public boolean AgreeParm(AgreeParm agreeParm) {
+        Assist assist = new Assist();
+        assist.andEq("id", agreeParm.getNewsid());
+        List<News> news = mainDao.selectNews(assist);
+        News news1 = news.get(0);
+        if (news1.getUserjson() == null) {
+            //第一个直接点赞
+            //插入id 以及插入增加用户点赞数
+            UserId userId = new UserId();
+            List<Integer> list = new ArrayList<>();
+            list.add(agreeParm.getUserid());
+            userId.setUserids(list);
+            String a = JSONObject.toJSONString(userId);
+            mainDao.updateNewsJson(a, agreeParm.getNewsid());
+            return true;
+        }
+        if (news1.getUserjson() != null) {
+            //获取这个对象然后查询中是否有该id 如果有则不准添加 没有则点赞
+            String a = news1.getUserjson();
+            UserId userId = JSONObject.parseObject(a, UserId.class);
+            List<Integer> list = userId.getUserids();
+            Integer b = 0;
+            for (Integer i : list) {
+                if (i == agreeParm.getUserid()) {
+                    b = i;
+                }
+            }
+            if (b == 0) {
+                //插入数据
+                list.add(agreeParm.getUserid());
+                UserId userId1 = new UserId();
+                userId1.setUserids(list);
+                String bv = JSONObject.toJSONString(userId1);
+                mainDao.updateNewsJson(bv, agreeParm.getNewsid());
+                return true;
+            }
+            return false;
+
+        }
+        return false;
+    }
+
+    //用户关注
+    public void foolowUser(FollowId followId) {
+        UserId userId = new UserId();
+        List<Integer> list = new ArrayList<>();
+        Assist assist = new Assist();
+        assist.andEq("id", followId.getAuthorid());
+        List<User> users = mainDao.selectUser(assist);
+        User user = users.get(0);
+        if (user.getByfollowjson() == null) {
+            //直接添加
+            list.add(followId.getUserid());
+            userId.setUserids(list);
+            String a = JSONObject.toJSONString(userId);
+            mainDao.updateFollowUser(a, followId.getUserid());
+            Assist assist1 = new Assist();
+            assist1.andEq("id", followId.getUserid());
+            User user1 = mainDao.selectUser(assist1).get(0);
+            if (user1.getAuthorjson() == null) {
+                UserId userId1 = new UserId();
+                List<Integer> list1 = new ArrayList<>();
+                list1.add(followId.getAuthorid());
+                userId1.setUserids(list1);
+                String b = JSONObject.toJSONString(userId1);
+                mainDao.updateByFollowUser(b, followId.getAuthorid());
+            } else {
+                UserId userId1 = JSONObject.parseObject(user1.getAuthorjson(), UserId.class);
+                List<Integer> list1 = userId1.getUserids();
+                list1.add(followId.getAuthorid());
+                userId1.setUserids(list1);
+                String c = JSONObject.toJSONString(userId1);
+                mainDao.updateByFollowUser(c, followId.getAuthorid());
+            }
+
+        } else {
+            UserId userId2 = JSONObject.parseObject(user.getByfollowjson(), UserId.class);
+            List<Integer> list3 = userId2.getUserids();
+            list3.add(followId.getUserid());
+            userId2.setUserids(list3);
+            String d = JSONObject.toJSONString(userId2);
+            mainDao.updateFollowUser(d, followId.getUserid());
+            //b
+            Assist assist1 = new Assist();
+            assist1.andEq("id", followId.getUserid());
+            User user1 = mainDao.selectUser(assist1).get(0);
+            if (user1.getAuthorjson() == null) {
+                UserId userId1 = new UserId();
+                List<Integer> list1 = new ArrayList<>();
+                list1.add(followId.getAuthorid());
+                userId1.setUserids(list1);
+                String b = JSONObject.toJSONString(userId1);
+                mainDao.updateByFollowUser(b, followId.getAuthorid());
+            } else {
+                UserId userId1 = JSONObject.parseObject(user1.getAuthorjson(), UserId.class);
+                List<Integer> list1 = userId1.getUserids();
+                list1.add(followId.getAuthorid());
+                userId1.setUserids(list1);
+                String c = JSONObject.toJSONString(userId1);
+                mainDao.updateByFollowUser(c, followId.getAuthorid());
+            }
+        }
     }
 }
 

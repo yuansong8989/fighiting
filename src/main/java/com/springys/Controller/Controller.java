@@ -7,6 +7,7 @@ import com.springys.Dao.JpaRepository;
 import com.springys.Dao.MainDao;
 import com.springys.Service.implement.ServiceImplements;
 import com.springys.entity.*;
+import com.springys.entity.Token;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -55,6 +56,7 @@ public class Controller {
             return ResultMain.success(MessageCode.success, ruseltData);
         }
     }
+
     @RequestMapping("exitDatabase")
     public Uniti exitDatabase(@RequestBody Five five) {
         if (five.getData() == null) {
@@ -480,20 +482,22 @@ public class Controller {
             return ResultUtil.error();
         }
         if (servicemain.selectUser(user)) {
-            Token token =new Token();
+            Token token = new Token();
             token.setToken(MD5Utils.md5password());
             return ResultUtil.success(token);
         } else return ResultUtil.error(RequestResultEnum.login_auth_error);
     }
-@RequestMapping("gettoken")
-@ResponseBody
-public ResultModel getToken(@RequestBody Token token){
-        if(token.getToken().equals(MD5Utils.md5password())){
+
+    @RequestMapping("gettoken")
+    @ResponseBody
+    public ResultModel getToken(@RequestBody Token token) {
+        if (token.getToken().equals(MD5Utils.md5password())) {
 //            servicemain.addUserinfo(token);
             return ResultUtil.success(servicemain.addUserinfo(token));
         }
         return ResultUtil.error();
-}
+    }
+
     //校园发布系统用户注册
     @RequestMapping("registuser")
     @ResponseBody
@@ -507,6 +511,7 @@ public ResultModel getToken(@RequestBody Token token){
         servicemain.registUser(user);
         return ResultUtil.success();
     }
+
     //两个头像 用户注册后默认头像  用户可在个人资料上管理自己资料
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
@@ -518,18 +523,19 @@ public ResultModel getToken(@RequestBody Token token){
                 for (int i = 0; i < multipartFile.length; i++) {
 //                    multipartFile[i].transferTo(new File("path"));
                     FileUtils.writeByteArrayToFile(new File("e:/upload/" + multipartFile[i].getOriginalFilename()), multipartFile[i].getBytes());//字节数组、
-                    String picturepath="e:/upload/" + multipartFile[i].getOriginalFilename();
+                    String picturepath = "e:/upload/" + multipartFile[i].getOriginalFilename();
                     servicemain.InsertHead(picturepath);
                 }
 
-               return ResultUtil.success();
+                return ResultUtil.success();
             } catch (IOException e) {
                 e.printStackTrace();
-               return ResultUtil.error();
+                return ResultUtil.error();
             }
         }
     }
-//后台管理-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+    //后台管理-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //校园新闻后台管理系统-用户管理模块
     //分页查询
     @RequestMapping("pageuser")
@@ -574,6 +580,7 @@ public ResultModel getToken(@RequestBody Token token){
         }
         return ResultUtil.error();
     }
+
     //校园后台批量删除用户
     @RequestMapping("deleteuser")
     @ResponseBody
@@ -595,7 +602,7 @@ public ResultModel getToken(@RequestBody Token token){
             return ResultUtil.error();
         }
         if (searchUser != null) {
-            FilePage filePage =servicemain.sortgrade(searchUser);
+            FilePage filePage = servicemain.sortgrade(searchUser);
             if (filePage != null) {
                 return ResultUtil.success(filePage);
             }
@@ -630,16 +637,17 @@ public ResultModel getToken(@RequestBody Token token){
         }
         return ResultUtil.error();
     }
+
     //校园新闻后台管理系统-新闻管理模块
     //新闻添加(管理员添加和 用户添加) 都添加至表allnews
     //管理员添加
     @RequestMapping("newsAdd")
     @ResponseBody
-    public ResultModel newsAdd(@RequestBody News news){
-        if(news!=null){
-                if(servicemain.addNews(news)) {
-                    return ResultUtil.success();
-                }
+    public ResultModel newsAdd(@RequestBody News news) {
+        if (news != null) {
+            if (servicemain.addNews(news)) {
+                return ResultUtil.success();
+            }
             return ResultUtil.error();
         }
         return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
@@ -649,75 +657,83 @@ public ResultModel getToken(@RequestBody Token token){
     //用户添加新闻
     @RequestMapping("usernewsAdd")
     @ResponseBody
-    public ResultModel userNewsAdd(@RequestBody News news){
-        if(news!=null){
-            if(servicemain.userAddNews(news)){
+    public ResultModel userNewsAdd(@RequestBody News news) {
+        if (news != null) {
+            if (servicemain.userAddNews(news)) {
                 return ResultUtil.success();
             }
             return ResultUtil.error();
         }
         return ResultUtil.error(RequestResultEnum.SCRIPT_NAME_EMPTY);
     }
+
     //获取新闻分类
     @RequestMapping("getclassify")
     @ResponseBody
-    public ResultModel getNewsClassify(){
-        FilePage filePage =new FilePage();
+    public ResultModel getNewsClassify() {
+        FilePage filePage = new FilePage();
         filePage.setClassify(servicemain.getClassify());
         return ResultUtil.success(filePage);
     }
+
     //获取娱乐新闻
     @RequestMapping("gethappynews")
     @ResponseBody
-    public  ResultModel getHappyNews(){
-        FilePage filePage =new FilePage();
+    public ResultModel getHappyNews() {
+        FilePage filePage = new FilePage();
         filePage.setNews(servicemain.getHappyNews(2));
         return ResultUtil.success(filePage);
     }
+
     //今日头条
     @RequestMapping("getheadnews")
     @ResponseBody
-    public  ResultModel getHeadNews(){
-        FilePage filePage =new FilePage();
+    public ResultModel getHeadNews() {
+        FilePage filePage = new FilePage();
         filePage.setNews(servicemain.getHappyNews(1));
         return ResultUtil.success(filePage);
     }
+
     //体育
     @RequestMapping("getsportsnews")
     @ResponseBody
-    public  ResultModel getSportsNews(){
-        FilePage filePage =new FilePage();
+    public ResultModel getSportsNews() {
+        FilePage filePage = new FilePage();
         filePage.setNews(servicemain.getHappyNews(3));
         return ResultUtil.success(filePage);
     }
+
     //游戏
     @RequestMapping("getgamenews")
     @ResponseBody
-    public  ResultModel getGameNews(){
-        FilePage filePage =new FilePage();
+    public ResultModel getGameNews() {
+        FilePage filePage = new FilePage();
         filePage.setNews(servicemain.getHappyNews(4));
         return ResultUtil.success(filePage);
     }
+
     //学校
     @RequestMapping("getschoolnews")
     @ResponseBody
-    public  ResultModel getSchoolNews(){
-        FilePage filePage =new FilePage();
+    public ResultModel getSchoolNews() {
+        FilePage filePage = new FilePage();
         filePage.setNews(servicemain.getHappyNews(5));
         return ResultUtil.success(filePage);
     }
+
     //校园公示栏
     @RequestMapping("getschoolcommon")
     @ResponseBody
-    public  ResultModel getSchoolCommon(){
-        FilePage filePage =new FilePage();
+    public ResultModel getSchoolCommon() {
+        FilePage filePage = new FilePage();
         filePage.setNews(servicemain.getHappyNews(6));
         return ResultUtil.success(filePage);
     }
-//新闻分页显示全部
+
+    //新闻分页显示全部
     @RequestMapping("pagenews")
     @ResponseBody
-    public ResultModel pageNews(@RequestBody PageParameter pageParameter){
+    public ResultModel pageNews(@RequestBody PageParameter pageParameter) {
         if (pageParameter.getPageNum() == 0 || pageParameter.getPagesize() == 0) {
             ResultUtil.error(RequestResultEnum.FAIL_PARAM_ERROR);
         } else {
@@ -726,17 +742,19 @@ public ResultModel getToken(@RequestBody Token token){
         }
         return ResultUtil.error(RequestResultEnum.EDIT_FAIL);
     }
+
     //新闻筛选 按照 作者 和分类
     @RequestMapping("findnews")
     @ResponseBody
-    public ResultModel findNews(@RequestBody News news){
+    public ResultModel findNews(@RequestBody News news) {
         //根据传入条件查找
         return ResultUtil.success(servicemain.findNews(news));
     }
+
     //新闻批量删除
     @RequestMapping("deletenews")
     @ResponseBody
-    public ResultModel deleteNews(@RequestBody FilePage filePage){
+    public ResultModel deleteNews(@RequestBody FilePage filePage) {
         if (filePage == null) {
             return ResultUtil.error(RequestResultEnum.DELETE_FAIL);
         }
@@ -757,16 +775,38 @@ public ResultModel getToken(@RequestBody Token token){
     //删除新闻 给读者发送消息
     //新闻审核通过 插入 主表新闻 给读者发布消息
 
-//excel
-@Autowired
-private MainDao mainDao;
-@GetMapping("/getexcel")
-public void exportTests(HttpServletResponse response) {
-        List list =mainDao.list();
-    try {
-        servicemain.exportTest(list, response);
-    } catch (IOException e) {
+    //excel
+    @Autowired
+    private MainDao mainDao;
+
+    @GetMapping("/getexcel")
+    public void exportTests(HttpServletResponse response) {
+        List list = mainDao.list();
+        try {
+            servicemain.exportTest(list, response);
+        } catch (IOException e) {
+        }
+        System.out.println("ss");
     }
-    System.out.println("ss");
-}
+
+    //用户点赞新闻 点赞后传入json 并且用户只能填点赞一次该新闻 先查看有没有该用户 如果没有 则点赞 如果有 则禁止点赞
+    //需传入该用户id 给用户点赞数+1 然后插入新闻字段 以及新闻数量
+    @RequestMapping("agreenews")
+    @ResponseBody
+    public ResultModel agreeNews(@RequestBody AgreeParm agreeParm) {
+        if (servicemain.AgreeParm(agreeParm)) {
+            return ResultUtil.success();
+        }
+        return ResultUtil.error();
+    }
+
+    //显示作者
+//查看某一作者 资料
+    //用户关注用户 （作者） 显示全部用户传入用户id 传入作者id
+    @RequestMapping("followauthor")
+    @ResponseBody
+    public ResultModel followAuthor(@RequestBody FollowId followId) {
+        servicemain.foolowUser(followId);
+        return ResultUtil.success();
+    }
 }

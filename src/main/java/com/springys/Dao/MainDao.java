@@ -60,4 +60,10 @@ public interface MainDao {
      List<User> list();
     List<Classify> selectClassify();
     void insertHead(@Param("path") String path);
+    //插入新闻数量
+    int updateNewsJson(@Param("userjson") String userjson,@Param("id") int id);
+    //更新关注用户
+    int updateFollowUser(@Param("a") String a,@Param("id") int id);
+//更新被关注用户
+    int updateByFollowUser(@Param("a")String a, @Param("id") int id);
 }
