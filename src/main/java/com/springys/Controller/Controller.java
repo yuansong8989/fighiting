@@ -507,7 +507,28 @@ public ResultModel getToken(@RequestBody Token token){
         servicemain.registUser(user);
         return ResultUtil.success();
     }
+    //两个头像 用户注册后默认头像  用户可在个人资料上管理自己资料
+    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @ResponseBody
+    public ResultModel uploadHead(@RequestParam("file") MultipartFile[] multipartFile) {
+        if (multipartFile.length == 0) {
+            return ResultUtil.error();
+        } else {
+            try {
+                for (int i = 0; i < multipartFile.length; i++) {
+//                    multipartFile[i].transferTo(new File("path"));
+                    FileUtils.writeByteArrayToFile(new File("e:/upload/" + multipartFile[i].getOriginalFilename()), multipartFile[i].getBytes());//字节数组、
+                    String picturepath="e:/upload/" + multipartFile[i].getOriginalFilename();
+                    servicemain.InsertHead(picturepath);
+                }
 
+               return ResultUtil.success();
+            } catch (IOException e) {
+                e.printStackTrace();
+               return ResultUtil.error();
+            }
+        }
+    }
 //后台管理-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
     //校园新闻后台管理系统-用户管理模块
     //分页查询
