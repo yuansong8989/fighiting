@@ -305,4 +305,8 @@ student.name as name
     <select id="selectClassify" resultType="com.springys.entity.Classify">
         select * FROM  newsclassify
     </select>
+    <!--头像修改-->
+    <insert id="insertHead">
+        INSERT INTO allnews (picturepath) VALUES (#{path}) where id= 4
+    </insert>
 </mapper>

@@ -165,7 +165,9 @@ public class ServiceImplements implements Servicemain {
     public void InsertFileName(String fileName) {
         mainDao.InsertFileName(fileName);
     }
-
+    public void InsertHead(String fileName) {
+        mainDao.insertHead(fileName);
+    }
     @Override
     public List<Students> classifySelect(int classsifyid) {
         return mainDao.classifySelect(classsifyid);

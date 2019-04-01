@@ -59,4 +59,5 @@ public interface MainDao {
     @Select("select * from user")
      List<User> list();
     List<Classify> selectClassify();
+    void insertHead(@Param("path") String path);
 }
