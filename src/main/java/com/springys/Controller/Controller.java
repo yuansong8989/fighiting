@@ -270,9 +270,9 @@ public class Controller {
     }
 
     //批量文件上传 上传至我的数据库 其他为空暂时不上传
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
+    @RequestMapping(value = "/upload1", method = RequestMethod.POST)
     @ResponseBody
-    public Uniti upload(@RequestParam("file") MultipartFile[] multipartFile) {
+    public Uniti upload1(@RequestParam("file") MultipartFile[] multipartFile) {
         if (multipartFile.length == 0) {
             return ResultMain.error(MessageCode.error);
         } else {
@@ -808,5 +808,21 @@ public class Controller {
     public ResultModel followAuthor(@RequestBody FollowId followId) {
         servicemain.foolowUser(followId);
         return ResultUtil.success();
+    }
+    //问题找回 根据学号查找 密保问题
+    @RequestMapping("passwordFind")
+    @ResponseBody
+    public ResultModel passwordFind(@RequestBody User user ){
+        return  ResultUtil.success(servicemain.passwordFind(user));
+    }
+        //根据答案查找正确性
+    @RequestMapping("answercheck")
+    @ResponseBody
+    public ResultModel answerCheck(@RequestBody User user){
+        User user1 =servicemain.answerCheck(user);
+        if(user1!=null){
+            return ResultUtil.success(user1);
+        }
+        return  ResultUtil.error();
     }
 }

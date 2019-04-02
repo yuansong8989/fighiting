@@ -23,4 +23,7 @@ public class User {
     private String role;
     private String authorjson;//自己关注
     private String byfollowjson;//被关注
+    private String answer;
+    private String headpath;
+    private String problem;
 }

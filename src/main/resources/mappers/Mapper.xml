@@ -141,7 +141,12 @@ student.name as name
         user.seenum as seenum,
         user.createtime as createtime,
         user.lastlogintime as lastlogintime,
-        user.role as role
+        user.role as role,
+        user.byfollowjson as byfollowjson,
+        user.authorjson as authorjson,
+        user.answer as answer,
+        user.headpath as headpath,
+        user.problem as problem
     </sql>
     <resultMap id="result_user" type="com.springys.entity.User">
         <id column="id" property="id"/>
@@ -158,6 +163,11 @@ student.name as name
         <result property="seenum" column="seenum"/>
         <result property="discussnum" column="discussnum"/>
         <result property="role" column="role"/>
+        <result property="authorjson" column="authorjson"/>
+        <result property="byfollowjson" column="byfollowjson"/>
+        <result property="headpath" column="headpath"/>
+        <result property="answer" column="answer"/>
+        <result property="problem" column="problem"/>
     </resultMap>
     <select id="selectUser" parameterType="com.springys.Common.Assist"  resultMap="result_user">
         select  <if test="distinct !=null">${distinct}</if>
@@ -211,7 +221,7 @@ student.name as name
         UPDATE user set user.banlogin=#{user.banlogin},user.password=#{user.password},user.safeindex=#{user.safeindex},user.email=#{user.email},user.username=#{user.username} WHERE user.id=#{user.id}
     </update>
     <insert id="registUser" parameterType="com.springys.entity.User">
-        INSERT INTO user (user.username,user.password,user.email,user.studentid) VALUES (#{user.username},#{user.password},#{user.email},#{user.studentid})
+        INSERT INTO user (user.username,user.password,user.email,user.studentid,user.problem,user.answer) VALUES (#{user.username},#{user.password},#{user.email},#{user.studentid},#{user.problem},#{user.answer})
     </insert>
     <update id="updateLasttime">
         UPDATE user set user.lastlogintime=#{lastlogintime} where user.id=#{id}
@@ -234,7 +244,8 @@ student.name as name
         allnews.userstudentid as userstudentid,
         allnews.content_short as content_short,
         allnews.adviseindex as adviseindex,
-        allnews.looknum as looknum
+        allnews.looknum as looknum,
+        allnews.userjson as userjson
     </sql>
     <resultMap id="result_news" type="com.springys.entity.News">
         <id column="id" property="id"/>
@@ -254,6 +265,7 @@ student.name as name
         <result property="content_short" column="content_short"/>
         <result property="adviseindex" column="adviseindex"/>
         <result property="looknum" column="looknum"/>
+        <result property="userjson" column="userjson"/>
     </resultMap>
     <select id="selectNews" parameterType="com.springys.Common.Assist"  resultMap="result_news">
         select  <if test="distinct !=null">${distinct}</if>

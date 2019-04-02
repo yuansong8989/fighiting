@@ -977,5 +977,21 @@ public class ServiceImplements implements Servicemain {
             }
         }
     }
+    //查询密保问题
+    public User passwordFind(User user){
+        Assist assist=new Assist();
+        assist.andEq("studentid",user.getStudentid());
+        User user1=mainDao.selectUser(assist).get(0);
+        return user1;
+    }
+    public User answerCheck(User user){
+        Assist assist =new Assist();
+        assist.andEq("studentid",user.getStudentid());
+        User user1 =mainDao.selectUser(assist).get(0);
+        if(user1.getStudentid().equals(user.getStudentid())&& user1.getAnswer().equals(user.getAnswer())){
+            return user1;
+        }
+        return null;
+    }
 }
 
