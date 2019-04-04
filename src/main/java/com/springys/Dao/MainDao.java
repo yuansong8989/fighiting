@@ -59,7 +59,7 @@ public interface MainDao {
     @Select("select * from user")
      List<User> list();
     List<Classify> selectClassify();
-    void insertHead(@Param("path") String path);
+    void insertHead(@Param("path") String path,@Param("studentid") String  studentid);
     //插入新闻数量
     int updateNewsJson(@Param("userjson") String userjson,@Param("id") int id);
     //更新关注用户

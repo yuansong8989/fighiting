@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
 import java.io.*;
@@ -26,6 +27,7 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by yzd on 2019/2/1.
@@ -515,7 +517,8 @@ public class Controller {
     //两个头像 用户注册后默认头像  用户可在个人资料上管理自己资料
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
     @ResponseBody
-    public ResultModel uploadHead(@RequestParam("file") MultipartFile[] multipartFile) {
+    public ResultModel uploadHead(@RequestParam("file") MultipartFile[] multipartFile , HttpServletRequest request) {
+        String studentId = request.getParameter("studentid");
         if (multipartFile.length == 0) {
             return ResultUtil.error();
         } else {
@@ -524,7 +527,7 @@ public class Controller {
 //                    multipartFile[i].transferTo(new File("path"));
                     FileUtils.writeByteArrayToFile(new File("e:/upload/" + multipartFile[i].getOriginalFilename()), multipartFile[i].getBytes());//字节数组、
                     String picturepath = "e:/upload/" + multipartFile[i].getOriginalFilename();
-                    servicemain.InsertHead(picturepath);
+                    servicemain.InsertHead(picturepath,studentId);
                 }
 
                 return ResultUtil.success();
@@ -824,5 +827,32 @@ public class Controller {
             return ResultUtil.success(user1);
         }
         return  ResultUtil.error();
+    }
+    //获取用户头像
+    @RequestMapping("getheadpath")
+    @ResponseBody
+    public ResultModel getHeadPath(@RequestBody User user){
+        User user1 = servicemain.getHeadPath(user);
+        String path=user1.getHeadpath();
+        File file =new File(path);
+        String endPath= file.getName();
+        String endingPath="http://localhost:8082/"+endPath;
+        user1.setHeadpath(endingPath);
+        return ResultUtil.success(user1);
+    }
+    @RequestMapping("sendmessage")
+    @ResponseBody
+    public ResultModel sendMessage(@RequestBody RabbitMessage message) throws IOException,TimeoutException{
+            if(servicemain.sendMessage(message)) {
+                return ResultUtil.success();
+            }
+        return ResultUtil.error();
+    }
+
+    @RequestMapping("acceptmessage")
+    @ResponseBody
+    public  ResultModel acceptMessage(@RequestBody RabbitMessage message)throws IOException,TimeoutException{
+        return  ResultUtil.success(servicemain.getList(message));
+
     }
 }

@@ -221,7 +221,7 @@ student.name as name
         UPDATE user set user.banlogin=#{user.banlogin},user.password=#{user.password},user.safeindex=#{user.safeindex},user.email=#{user.email},user.username=#{user.username} WHERE user.id=#{user.id}
     </update>
     <insert id="registUser" parameterType="com.springys.entity.User">
-        INSERT INTO user (user.username,user.password,user.email,user.studentid,user.problem,user.answer) VALUES (#{user.username},#{user.password},#{user.email},#{user.studentid},#{user.problem},#{user.answer})
+        INSERT INTO user (user.username,user.password,user.email,user.studentid,user.problem,user.answer,user.role,user.headpath) VALUES (#{user.username},#{user.password},#{user.email},#{user.studentid},#{user.problem},#{user.answer},#{user.role},#{user.headpath})
     </insert>
     <update id="updateLasttime">
         UPDATE user set user.lastlogintime=#{lastlogintime} where user.id=#{id}
@@ -319,7 +319,7 @@ student.name as name
     </select>
     <!--头像修改-->
     <insert id="insertHead">
-        INSERT INTO allnews (picturepath) VALUES (#{path}) where id= 4
+        update user SET user.headpath=#{path} where user.studentid=#{studentid}
     </insert>
     <update id="updateNewsJson">
         update  allnews set allnews.userjson=#{userjson}, allnews.agreenum=allnews.agreenum+1  where allnews.id=#{id}

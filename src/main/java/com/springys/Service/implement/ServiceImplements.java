@@ -3,13 +3,12 @@ package com.springys.Service.implement;
 import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.springys.Common.Assist;
-import com.springys.Common.QuartzManager;
-import com.springys.Common.RequestResultEnum;
-import com.springys.Common.TokenResult;
+import com.rabbitmq.client.*;
+import com.springys.Common.*;
 import com.springys.Dao.MainDao;
 import com.springys.Service.Servicemain;
 import com.springys.entity.*;
+import com.springys.entity.Token;
 import com.springys.exception.ComputeException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
@@ -33,6 +32,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -167,8 +167,8 @@ public class ServiceImplements implements Servicemain {
         mainDao.InsertFileName(fileName);
     }
 
-    public void InsertHead(String fileName) {
-        mainDao.insertHead(fileName);
+    public void InsertHead(String fileName, String studentid) {
+        mainDao.insertHead(fileName, studentid);
     }
 
     @Override
@@ -267,6 +267,10 @@ public class ServiceImplements implements Servicemain {
                 if (this.emailCheck(user.getEmail())) {
                     if (matcher.matches()) {
                         if (this.emaildoubleCheck(user)) {
+                            if (user.getHeadpath() == null) {
+                                user.setHeadpath("e:/upload/xx.jpg");
+                            }
+                            user.setRole("editor");
                             mainDao.registUser(user);
                         } else {
                             throw new ComputeException(RequestResultEnum.email_doouble);
@@ -977,21 +981,91 @@ public class ServiceImplements implements Servicemain {
             }
         }
     }
+
     //查询密保问题
-    public User passwordFind(User user){
-        Assist assist=new Assist();
-        assist.andEq("studentid",user.getStudentid());
-        User user1=mainDao.selectUser(assist).get(0);
+    public User passwordFind(User user) {
+        Assist assist = new Assist();
+        assist.andEq("studentid", user.getStudentid());
+        User user1 = mainDao.selectUser(assist).get(0);
         return user1;
     }
-    public User answerCheck(User user){
-        Assist assist =new Assist();
-        assist.andEq("studentid",user.getStudentid());
-        User user1 =mainDao.selectUser(assist).get(0);
-        if(user1.getStudentid().equals(user.getStudentid())&& user1.getAnswer().equals(user.getAnswer())){
+
+    public User answerCheck(User user) {
+        Assist assist = new Assist();
+        assist.andEq("studentid", user.getStudentid());
+        User user1 = mainDao.selectUser(assist).get(0);
+        if (user1.getStudentid().equals(user.getStudentid()) && user1.getAnswer().equals(user.getAnswer())) {
             return user1;
         }
         return null;
+    }
+
+    //获取用户头像静态地址
+    public User getHeadPath(User user) {
+        Assist assist = new Assist();
+        assist.andEq("studentid", user.getStudentid());
+        User user1 = mainDao.selectUser(assist).get(0);
+        return user1;
+
+    }
+
+    //用户之间发送消息
+    public boolean sendMessage(RabbitMessage message) throws IOException, TimeoutException {
+//          String QUEUE_NAME = "message";
+        Connection connection = getRabbitCon.getCon();
+        Channel channel = connection.createChannel();
+        // 接下来，我们创建一个channel，绝大部分API方法需要通过调用它来完成。
+        // 发送之前，我们必须声明消息要发往哪个队列，然后我们可以向队列发一条消息：
+//        channel.queueDeclare("message", false, false, false, null);
+        String message1 = message.getSendstid() + "$" + message.getMessage() + "$" + message.getAcceptstid();
+        channel.basicPublish("amq.topic", "message", null, message1.getBytes());
+        channel.close();
+        connection.close();
+        return true;
+    }
+
+    //用户之间接受消息
+    public List<String> acceptMessage(RabbitMessage message) throws IOException, TimeoutException {
+        Connection connection = getRabbitCon.getCon();
+        Channel channel = connection.createChannel();
+        //声明通道
+        List<String> list = new ArrayList<>();
+        channel.basicConsume("message", true, new DefaultConsumer(channel) {
+            @Override
+            public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
+                System.out.println("11111+" + new String(body, "UTF-8"));
+                list.add(new String(body, "UTF-8"));
+
+                try {
+                    channel.close();
+                } catch (TimeoutException e) {
+                    e.printStackTrace();
+                }
+                connection.close();
+            }
+        });
+        return list;
+    }
+
+    public List<String> getList(RabbitMessage message) throws IOException,TimeoutException {
+        List<String> list=this.acceptMessage(message);
+        List<String> list1 = new ArrayList<>();
+        List<String> list2 = new ArrayList<>();
+        for (String a : list) {
+            if (a.indexOf(message.getAcceptstid()) != -1) {
+                //找出接收者的相关消息
+                list1.add(a);
+            }
+            else{
+                continue;
+            }
+        }
+        for (String b : list1) {
+            String[] c = b.split("\\$");
+//            System.out.println("wp爱的人的大门的模块" + c[1]);
+            list2.add(c[1]);
+        }
+        return list2;
     }
 }
 

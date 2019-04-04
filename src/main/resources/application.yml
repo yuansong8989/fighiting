@@ -83,4 +83,4 @@ logging:
 #  params: count=countSq
 web:
   upload:
-    path: G:/upload/
+    path: E:/upload/
